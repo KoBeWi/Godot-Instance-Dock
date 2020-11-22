@@ -94,9 +94,7 @@ func scene_set(scene: String, slot: int):
 	
 	if slot == slot_container.get_child_count() - 1:
 		for i in 5:
-			var sloti = preload("res://addons/InstanceDock/InstanceSlot.tscn").instance()
-			slot_container.add_child(sloti)
-			sloti.connect("scene_set", self, "scene_set", [slot + i + 1])
+			add_slot(slot + i + 1)
 
 func _process(delta: float) -> void:
 	if icon_queue.empty():
