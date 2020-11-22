@@ -19,11 +19,11 @@ var scenes: Dictionary
 var icon_cache: Dictionary
 
 var tab_to_remove: int
-var icon_generator_free := true
-
-signal icon_generated
+var icon_queue: Array
+var icon_progress: int
 
 func _ready() -> void:
+	set_process(false)
 	if not edited:
 		if ProjectSettings.has_setting(PROJECT_SETTING):
 			scenes = ProjectSettings.get_setting(PROJECT_SETTING)
@@ -98,27 +98,44 @@ func scene_set(scene: String, slot: int):
 			slot_container.add_child(sloti)
 			sloti.connect("scene_set", self, "scene_set", [slot + i + 1])
 
-func generate_icon(instance: Node2D, slot: Control):
-	if not instance:
+func _process(delta: float) -> void:
+	if icon_queue.empty():
+		set_process(false)
 		return
 	
-	while not icon_generator_free:
-		yield(self, "icon_generated")
+	var instance = icon_queue.front()[0]
+	var slot = icon_queue.front()[1]
 	
-	icon_generator_free = false
+	while not is_instance_valid(slot):
+		icon_progress = 0
+		icon_queue.pop_front()
+		instance.free()
+		
+		if not icon_queue.empty():
+			instance = icon_queue.front()[0]
+			slot = icon_queue.front()[1]
+		else:
+			return
 	
-	icon_generator.add_child(instance)
-	instance.position = Vector2(32, 32)
-	yield(get_tree(), "idle_frame")
-	yield(get_tree(), "idle_frame")
+	match icon_progress:
+		0:
+			icon_generator.add_child(instance)
+			instance.position = Vector2(32, 32)
+		3:
+			var texture = ImageTexture.new()
+			texture.create_from_image(icon_generator.get_texture().get_data())
+			slot.set_texture(texture)
+			icon_cache[slot.scene] = texture
+			instance.free()
+			
+			icon_progress = -1
+			icon_queue.pop_front()
 	
-	var texture = ImageTexture.new()
-	texture.create_from_image(icon_generator.get_texture().get_data())
-	slot.set_texture(texture)
-	instance.free()
-	
-	icon_generator_free = true
-	emit_signal("icon_generated")
+	icon_progress += 1
+
+func generate_icon(instance: Node2D, slot: Control):
+	icon_queue.append([instance, slot])
+	set_process(true)
 
 func add_slot(scene_id: int) -> Control:
 	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instance()
