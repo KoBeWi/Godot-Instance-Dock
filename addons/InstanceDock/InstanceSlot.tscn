@@ -29,3 +29,8 @@ margin_top = 2.0
 margin_right = 62.0
 margin_bottom = 62.0
 expand = true
+
+[node name="PopupMenu" type="PopupMenu" parent="."]
+items = [ "Open Scene", null, 0, false, false, 0, 0, null, "", false, "Remove", null, 0, false, false, 1, 0, null, "", false, "Refresh Icon", null, 0, false, false, 2, 0, null, "", false ]
+
+[connection signal="id_pressed" from="PopupMenu" to="." method="menu_option"]

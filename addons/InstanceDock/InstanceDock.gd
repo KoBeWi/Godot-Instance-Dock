@@ -22,6 +22,8 @@ var tab_to_remove: int
 var icon_queue: Array
 var icon_progress: int
 
+var plugin: EditorPlugin
+
 func _ready() -> void:
 	set_process(false)
 	if not edited:
@@ -96,6 +98,12 @@ func scene_set(scene: String, slot: int):
 		for i in 5:
 			add_slot(slot + i + 1)
 
+func remove_scene(slot: int):
+	var tab_scenes = scenes[scenes.keys()[tabs.current_tab]]
+	tab_scenes[slot] = ""
+	while not tab_scenes.empty() and tab_scenes.back() == "":
+		tab_scenes.pop_back()
+
 func _process(delta: float) -> void:
 	if icon_queue.empty():
 		set_process(false)
@@ -137,7 +145,9 @@ func generate_icon(instance: Node2D, slot: Control):
 
 func add_slot(scene_id: int) -> Control:
 	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instance()
+	slot.plugin = plugin
 	slot_container.add_child(slot)
 	slot.connect("request_icon", self, "generate_icon", [slot])
 	slot.connect("scene_set", self, "scene_set", [scene_id])
+	slot.connect("remove_scene", self, "remove_scene", [scene_id])
 	return slot
