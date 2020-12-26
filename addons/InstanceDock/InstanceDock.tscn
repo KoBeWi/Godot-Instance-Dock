@@ -10,56 +10,59 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 343.0
 margin_bottom = 1073.0
-scroll_horizontal_enabled = false
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
-margin_right = 336.0
-margin_bottom = 1066.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="HBoxContainer" type="HBoxContainer" parent="ScrollContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 margin_right = 336.0
 margin_bottom = 40.0
 size_flags_horizontal = 3
 
-[node name="Tabs" type="Tabs" parent="ScrollContainer/VBoxContainer/HBoxContainer"]
+[node name="Tabs" type="Tabs" parent="VBoxContainer/HBoxContainer"]
 margin_right = 304.0
 margin_bottom = 40.0
 size_flags_horizontal = 3
 tab_align = 0
 tab_close_display_policy = 1
 
-[node name="Button" type="Button" parent="ScrollContainer/VBoxContainer/HBoxContainer"]
+[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer"]
 margin_left = 308.0
 margin_right = 336.0
 margin_bottom = 40.0
 text = "+"
 
-[node name="GridContainer" type="GridContainer" parent="ScrollContainer/VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
 margin_top = 44.0
 margin_right = 336.0
-margin_bottom = 965.0
+margin_bottom = 1066.0
+size_flags_vertical = 3
+scroll_horizontal_enabled = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+margin_right = 336.0
+margin_bottom = 1022.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+[node name="GridContainer" type="GridContainer" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
+margin_right = 336.0
+size_flags_horizontal = 3
 columns = 5
 
-[node name="Label" type="Label" parent="ScrollContainer/VBoxContainer"]
-margin_top = 969.0
+[node name="Label" type="Label" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
+margin_top = 4.0
 margin_right = 336.0
-margin_bottom = 999.0
+margin_bottom = 34.0
 text = "Add tab to continue"
 autowrap = true
 
-[node name="Label2" type="Label" parent="ScrollContainer/VBoxContainer"]
-margin_top = 1003.0
+[node name="Label2" type="Label" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
+margin_top = 38.0
 margin_right = 336.0
-margin_bottom = 1066.0
+margin_bottom = 101.0
 text = "Drag scene on slot to assign"
 autowrap = true
 
@@ -119,8 +122,9 @@ transparent_bg = true
 usage = 0
 render_target_v_flip = true
 render_target_update_mode = 3
-[connection signal="tab_changed" from="ScrollContainer/VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_changed"]
-[connection signal="tab_close" from="ScrollContainer/VBoxContainer/HBoxContainer/Tabs" to="." method="tab_close_attempt"]
-[connection signal="pressed" from="ScrollContainer/VBoxContainer/HBoxContainer/Button" to="." method="add_tab_pressed"]
+
+[connection signal="tab_changed" from="VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_changed"]
+[connection signal="tab_close" from="VBoxContainer/HBoxContainer/Tabs" to="." method="tab_close_attempt"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Button" to="." method="add_tab_pressed"]
 [connection signal="confirmed" from="Control/ConfirmationDialog" to="." method="remove_tab_confirm"]
 [connection signal="confirmed" from="Control/ConfirmationDialog2" to="." method="add_tab_confirm"]

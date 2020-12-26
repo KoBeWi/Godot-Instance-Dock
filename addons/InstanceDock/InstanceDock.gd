@@ -4,19 +4,22 @@ var edited := true
 
 const PROJECT_SETTING = "addons/instance_dock/scenes"
 
-onready var tabs := $ScrollContainer/VBoxContainer/HBoxContainer/Tabs
+onready var tabs := $VBoxContainer/HBoxContainer/Tabs
 onready var tab_add_confirm := $Control/ConfirmationDialog2
 onready var tab_add_name := tab_add_confirm.get_node("LineEdit")
 onready var tab_delete_confirm := $Control/ConfirmationDialog
 
-onready var slot_container := $ScrollContainer/VBoxContainer/GridContainer
-onready var add_tab_label := $ScrollContainer/VBoxContainer/Label
-onready var drag_label := $ScrollContainer/VBoxContainer/Label2
+onready var scroll := $VBoxContainer/ScrollContainer
+onready var slot_container := $VBoxContainer/ScrollContainer/VBoxContainer/GridContainer
+onready var add_tab_label := $VBoxContainer/ScrollContainer/VBoxContainer/Label
+onready var drag_label := $VBoxContainer/ScrollContainer/VBoxContainer/Label2
 
 onready var icon_generator := $Viewport
 
 var scenes: Dictionary
 var icon_cache: Dictionary
+var scrolls: Array
+var previous_tab: int
 
 var tab_to_remove: int
 var icon_queue: Array
@@ -36,6 +39,9 @@ func _ready() -> void:
 			tabs.add_tab(key)
 		
 		refresh_tabs()
+	
+	for i in tabs.get_tab_count():
+		scrolls.append(0)
 
 func add_tab_pressed() -> void:
 	tab_add_name.text = ""
@@ -44,6 +50,7 @@ func add_tab_pressed() -> void:
 func add_tab_confirm() -> void:
 	tabs.add_tab(tab_add_name.text)
 	scenes[tab_add_name.text] = []
+	scrolls.append(0)
 	refresh_tabs()
 
 func tab_close_attempt(tab: int) -> void:
@@ -53,10 +60,17 @@ func tab_close_attempt(tab: int) -> void:
 func remove_tab_confirm() -> void:
 	tabs.remove_tab(tab_to_remove)
 	scenes.erase(scenes.keys()[tab_to_remove])
+	scrolls.remove(tab_to_remove)
 	refresh_tabs()
+	scroll.scroll_vertical = scrolls[tabs.current_tab]
 
 func on_tab_changed(tab: int) -> void:
+	scrolls[previous_tab] = scroll.scroll_vertical
 	refresh_tabs()
+	previous_tab = tab
+	yield(get_tree(), "idle_frame")
+	yield(get_tree(), "idle_frame")
+	scroll.scroll_vertical = scrolls[tabs.current_tab]
 
 func refresh_tabs():
 	for c in slot_container.get_children():
