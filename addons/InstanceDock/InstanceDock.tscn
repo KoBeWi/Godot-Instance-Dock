@@ -122,7 +122,6 @@ __meta__ = {
 }
 
 [node name="Viewport" type="Viewport" parent="."]
-size = Vector2( 64, 64 )
 transparent_bg = true
 usage = 0
 render_target_v_flip = true

@@ -11,8 +11,7 @@ var scene: String
 var custom_texture: String
 
 signal request_icon(instance, ignore_cache)
-signal scene_set(path)
-signal remove_scene
+signal changed
 
 func can_drop_data(position: Vector2, data) -> bool:
 	if not "type" in data:
@@ -30,36 +29,27 @@ func drop_data(position: Vector2, data) -> void:
 	var file: String = data.files[0]
 	if file.get_extension() == "png" and scene:
 		custom_texture = file
-		set_texture(load(file))
+		set_icon(load(file))
+		emit_signal("changed")
 	elif file.get_extension() == "tscn":
-		var drag_texture: String
 		if "from_slot" in data:
-			var slot2: Control = data.from_slot
-			drag_texture = slot2.custom_texture
-			slot2.set_scene(scene, custom_texture)
-		
-		set_scene(file, drag_texture)
-		emit_signal("scene_set", file)
+			var slot2: Control = get_parent().get_child(data.from_slot)
+			var data2: Dictionary = slot2.get_data()
+			slot2.set_data(get_data())
+			set_data(data2)
+		else:
+			scene = file
+			custom_texture = ""
+			apply_data()
+		emit_signal("changed")
 
 func get_drag_data(position: Vector2):
 	if not scene:
 		return null
 	
-	return {files = [scene], type = "files", from_slot = self}
+	return {files = [scene], type = "files", from_slot = get_index()}
 
-func set_scene(s: String, custom_icon: String):
-	scene = s
-	hint_tooltip = scene.get_file()
-	
-	custom_texture = custom_icon
-	if scene.empty():
-		set_texture(null)
-	elif custom_texture.empty():
-		emit_signal("request_icon", scene)
-	else:
-		set_texture(load(custom_texture))
-
-func set_texture(texture: Texture):
+func set_icon(texture: Texture):
 	icon.texture = texture
 
 func _gui_input(event: InputEvent) -> void:
@@ -78,7 +68,7 @@ func create_popup():
 	popup.add_item("Remove", MenuOption.REMOVE)
 	popup.add_item("Refresh Icon", MenuOption.REFRESH)
 	if custom_texture:
-		popup.add_item("Remove Icon", MenuOption.CLEAR)
+		popup.add_item("Remove Custom Icon", MenuOption.CLEAR)
 	popup.rect_size = Vector2()
 
 func menu_option(id: int) -> void:
@@ -86,11 +76,38 @@ func menu_option(id: int) -> void:
 		MenuOption.EDIT:
 			plugin.open_scene(scene)
 		MenuOption.REMOVE:
-			set_scene("", "")
-			emit_signal("remove_scene")
+			scene = ""
+			custom_texture = ""
+			apply_data()
+			emit_signal("changed")
 		MenuOption.REFRESH:
 			emit_signal("request_icon", scene, true)
 		MenuOption.CLEAR:
 			custom_texture = ""
-			set_texture(null)
-			emit_signal("request_icon", scene, true)
+			emit_signal("changed")
+			apply_data()
+
+func get_data() -> Dictionary:
+	if scene.empty():
+		return {}
+	
+	var data := {scene = scene}
+	if not custom_texture.empty():
+		data.custom_texture = custom_texture
+	return data
+
+func set_data(data: Dictionary):
+	scene = data.get("scene", "")
+	custom_texture = data.get("custom_texture", "")
+	apply_data()
+
+func apply_data():
+	hint_tooltip = scene.get_file()
+	set_icon(null)
+	
+	if scene.empty():
+		set_icon(null)
+	elif custom_texture.empty():
+		emit_signal("request_icon", scene, false)
+	else:
+		set_icon(load(custom_texture))

@@ -3,8 +3,9 @@ extends PanelContainer
 var edited := true
 
 const PROJECT_SETTING = "addons/instance_dock/scenes"
+const PREVIEW_SIZE = Vector2(64, 64)
 
-onready var tabs := $VBoxContainer/HBoxContainer/Tabs
+onready var tabs := $VBoxContainer/HBoxContainer/Tabs as Tabs
 onready var tab_add_confirm := $Control/ConfirmationDialog2
 onready var tab_add_name := tab_add_confirm.get_node("LineEdit")
 onready var tab_delete_confirm := $Control/ConfirmationDialog
@@ -29,6 +30,8 @@ var plugin: EditorPlugin
 
 func _ready() -> void:
 	set_process(false)
+	icon_generator.size = PREVIEW_SIZE
+	
 	if not edited:
 		if ProjectSettings.has_setting(PROJECT_SETTING):
 			data = ProjectSettings.get_setting(PROJECT_SETTING)
@@ -38,7 +41,7 @@ func _ready() -> void:
 		for tab in data:
 			tabs.add_tab(tab.name)
 		
-		refresh_tabs()
+		refresh_tab_contents()
 
 func on_add_tab_pressed() -> void:
 	tab_add_name.text = ""
@@ -51,28 +54,31 @@ func add_tab_confirm(q = null) -> void:
 	
 	tabs.add_tab(tab_add_name.text)
 	data.append({name = tab_add_name.text, scenes = [], scroll = 0})
-	refresh_tabs()
+	ProjectSettings.save()
+	
+	if data.size() == 1:
+		refresh_tab_contents()
 
 func on_tab_close_attempt(tab: int) -> void:
 	tab_to_remove = tab
 	tab_delete_confirm.popup_centered_minsize()
 
 func remove_tab_confirm() -> void:
+	if tab_to_remove == tabs.current_tab or tabs.get_tab_count() == 1:
+		call_deferred("refresh_tab_contents")
+	
 	tabs.remove_tab(tab_to_remove)
-	for tab in data:
-		if tab.name == tab_to_remove:
-			data.erase(tab)
-			break
-	refresh_tabs()
+	data.remove(tab_to_remove)
+	ProjectSettings.save()
 
 func on_tab_changed(tab: int) -> void:
 	data[previous_tab].scroll = scroll.scroll_vertical
 	previous_tab = tab
-	refresh_tabs()
+	refresh_tab_contents()
 
-func refresh_tabs():
+func refresh_tab_contents():
 	for c in slot_container.get_children():
-		c.queue_free()
+		c.free()
 	
 	if tabs.get_tab_count() == 0:
 		slot_container.hide()
@@ -87,13 +93,14 @@ func refresh_tabs():
 	var tab_data: Dictionary = data[tabs.current_tab]
 	var scenes: Array = tab_data.scenes
 	
-	for i in ceil((scenes.size() + 1) / 5.0) * 5:
-		var slot = add_slot(i)
-		
+	adjust_slot_count()
+	for i in slot_container.get_child_count():
 		if i < scenes.size() and not scenes[i].empty():
-			slot.set_scene(scenes[i].name, scenes[i].get("custom_icon", ""))
+			slot_container.get_child(i).set_data(scenes[i])
+		else:
+			slot_container.get_child(i).set_data({})
 	
-	scroll.scroll_vertical - tab_data.scroll
+	scroll.scroll_vertical = tab_data.scroll
 
 func scene_set(scene: String, slot: int):
 	var tab_scenes: Array = data[tabs.current_tab].scenes
@@ -105,10 +112,7 @@ func scene_set(scene: String, slot: int):
 	
 	tab_scenes[slot] = {name = scene}
 	ProjectSettings.save()
-	
-	if slot == slot_container.get_child_count() - 1:
-		for i in 5:
-			add_slot(slot + i + 1)
+	adjust_slot_count()
 
 func remove_scene(slot: int):
 	var tab_scenes: Array = data[tabs.current_tab].scenes
@@ -138,11 +142,11 @@ func _process(delta: float) -> void:
 	match icon_progress:
 		0:
 			icon_generator.add_child(instance)
-			instance.position = Vector2(32, 32)
+			instance.position = PREVIEW_SIZE * 0.5
 		3:
 			var texture = ImageTexture.new()
 			texture.create_from_image(icon_generator.get_texture().get_data())
-			slot.set_texture(texture)
+			slot.set_icon(texture)
 			icon_cache[slot.scene] = texture
 			instance.free()
 			
@@ -151,11 +155,11 @@ func _process(delta: float) -> void:
 	
 	icon_progress += 1
 
-func set_icon(scene_path: String, slot: Control, ignore_cache = false):
+func assign_icon(scene_path: String, ignore_cache: bool, slot: Control):
 	if not ignore_cache:
 		var icon := icon_cache.get(scene_path, null) as Texture
 		if icon:
-			slot.set_texture(icon)
+			slot.set_icon(icon)
 			return
 	generate_icon(scene_path, slot)
 
@@ -164,11 +168,33 @@ func generate_icon(scene_path: String, slot: Control):
 	icon_queue.append([instance, slot])
 	set_process(true)
 
-func add_slot(scene_id: int) -> Control:
+func add_slot() -> Control:
 	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instance()
 	slot.plugin = plugin
 	slot_container.add_child(slot)
-	slot.connect("request_icon", self, "set_icon", [slot])
-	slot.connect("scene_set", self, "scene_set", [scene_id])
-	slot.connect("remove_scene", self, "remove_scene", [scene_id])
+	slot.connect("request_icon", self, "assign_icon", [slot])
+	slot.connect("changed", self, "recreate_tab_data")
 	return slot
+
+func recreate_tab_data():
+	var tab_scenes: Array = data[tabs.current_tab].scenes
+	tab_scenes.clear()
+	
+	for slot in slot_container.get_children():
+		tab_scenes.append(slot.get_data())
+	
+	while not tab_scenes.empty() and tab_scenes.back().empty():
+		tab_scenes.pop_back()
+	
+	ProjectSettings.save()
+	adjust_slot_count()
+
+func adjust_slot_count():
+	var tab_scenes: Array = data[tabs.current_tab].scenes
+	var desired_slots: int = ceil((tab_scenes.size() + 1) / 5.0) * 5
+	
+	while desired_slots > slot_container.get_child_count():
+		add_slot()
+	
+	while desired_slots < slot_container.get_child_count():
+		slot_container.get_child(slot_container.get_child_count() - 1).free()
