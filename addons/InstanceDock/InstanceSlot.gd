@@ -1,15 +1,16 @@
 tool
 extends PanelContainer
 
-enum MENU_OPTION {EDIT, REMOVE, REFRESH}
+enum MenuOption {EDIT, REMOVE, REFRESH, CLEAR}
 
 onready var icon := $TextureRect
 onready var popup := $PopupMenu
 
 var plugin: EditorPlugin
 var scene: String
+var custom_texture: String
 
-signal request_icon(instance)
+signal request_icon(instance, ignore_cache)
 signal scene_set(path)
 signal remove_scene
 
@@ -23,22 +24,40 @@ func can_drop_data(position: Vector2, data) -> bool:
 	if data.files.size() != 1:
 		return false
 	
-	return data.files[0].get_extension() == "tscn"
+	return data.files[0].get_extension() == "tscn" or data.files[0].get_extension() == "png"
 
 func drop_data(position: Vector2, data) -> void:
-	var file = data.files[0]
-	set_scene(file)
-	
-	var instance = load(file).instance()
-	emit_signal("request_icon", instance)
-	emit_signal("scene_set", file)
+	var file: String = data.files[0]
+	if file.get_extension() == "png" and scene:
+		custom_texture = file
+		set_texture(load(file))
+	elif file.get_extension() == "tscn":
+		var drag_texture: String
+		if "from_slot" in data:
+			var slot2: Control = data.from_slot
+			drag_texture = slot2.custom_texture
+			slot2.set_scene(scene, custom_texture)
+		
+		set_scene(file, drag_texture)
+		emit_signal("scene_set", file)
 
 func get_drag_data(position: Vector2):
-	return {files = [scene], type = "files"}
+	if not scene:
+		return null
+	
+	return {files = [scene], type = "files", from_slot = self}
 
-func set_scene(s: String):
+func set_scene(s: String, custom_icon: String):
 	scene = s
 	hint_tooltip = scene.get_file()
+	
+	custom_texture = custom_icon
+	if scene.empty():
+		set_texture(null)
+	elif custom_texture.empty():
+		emit_signal("request_icon", scene)
+	else:
+		set_texture(load(custom_texture))
 
 func set_texture(texture: Texture):
 	icon.texture = texture
@@ -49,17 +68,29 @@ func _gui_input(event: InputEvent) -> void:
 	
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == BUTTON_RIGHT:
+			create_popup()
 			popup.popup()
 			popup.rect_global_position = event.global_position
 
+func create_popup():
+	popup.clear()
+	popup.add_item("Open Scene", MenuOption.EDIT)
+	popup.add_item("Remove", MenuOption.REMOVE)
+	popup.add_item("Refresh Icon", MenuOption.REFRESH)
+	if custom_texture:
+		popup.add_item("Remove Icon", MenuOption.CLEAR)
+	popup.rect_size = Vector2()
+
 func menu_option(id: int) -> void:
 	match id:
-		MENU_OPTION.EDIT:
+		MenuOption.EDIT:
 			plugin.open_scene(scene)
-		MENU_OPTION.REMOVE:
-			icon.texture = null
-			scene = ""
-			hint_tooltip = ""
+		MenuOption.REMOVE:
+			set_scene("", "")
 			emit_signal("remove_scene")
-		MENU_OPTION.REFRESH:
-			emit_signal("request_icon", load(scene).instance())
+		MenuOption.REFRESH:
+			emit_signal("request_icon", scene, true)
+		MenuOption.CLEAR:
+			custom_texture = ""
+			set_texture(null)
+			emit_signal("request_icon", scene, true)

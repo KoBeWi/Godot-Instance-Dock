@@ -16,9 +16,9 @@ onready var drag_label := $VBoxContainer/ScrollContainer/VBoxContainer/Label2
 
 onready var icon_generator := $Viewport
 
-var scenes: Dictionary
+var data: Array
+
 var icon_cache: Dictionary
-var scrolls: Array
 var previous_tab: int
 
 var tab_to_remove: int
@@ -31,46 +31,44 @@ func _ready() -> void:
 	set_process(false)
 	if not edited:
 		if ProjectSettings.has_setting(PROJECT_SETTING):
-			scenes = ProjectSettings.get_setting(PROJECT_SETTING)
+			data = ProjectSettings.get_setting(PROJECT_SETTING)
 		else:
-			ProjectSettings.set_setting(PROJECT_SETTING, scenes)
+			ProjectSettings.set_setting(PROJECT_SETTING, data)
 		
-		for key in scenes:
-			tabs.add_tab(key)
+		for tab in data:
+			tabs.add_tab(tab.name)
 		
 		refresh_tabs()
-	
-	for i in tabs.get_tab_count():
-		scrolls.append(0)
 
-func add_tab_pressed() -> void:
+func on_add_tab_pressed() -> void:
 	tab_add_name.text = ""
-	tab_add_confirm.popup_centered()
+	tab_add_confirm.popup_centered_minsize()
+	tab_add_name.call_deferred("grab_focus")
 
-func add_tab_confirm() -> void:
+func add_tab_confirm(q = null) -> void:
+	if q != null:
+		tab_add_confirm.hide()
+	
 	tabs.add_tab(tab_add_name.text)
-	scenes[tab_add_name.text] = []
-	scrolls.append(0)
+	data.append({name = tab_add_name.text, scenes = [], scroll = 0})
 	refresh_tabs()
 
-func tab_close_attempt(tab: int) -> void:
+func on_tab_close_attempt(tab: int) -> void:
 	tab_to_remove = tab
-	tab_delete_confirm.popup_centered()
+	tab_delete_confirm.popup_centered_minsize()
 
 func remove_tab_confirm() -> void:
 	tabs.remove_tab(tab_to_remove)
-	scenes.erase(scenes.keys()[tab_to_remove])
-	scrolls.remove(tab_to_remove)
+	for tab in data:
+		if tab.name == tab_to_remove:
+			data.erase(tab)
+			break
 	refresh_tabs()
-	scroll.scroll_vertical = scrolls[tabs.current_tab]
 
 func on_tab_changed(tab: int) -> void:
-	scrolls[previous_tab] = scroll.scroll_vertical
-	refresh_tabs()
+	data[previous_tab].scroll = scroll.scroll_vertical
 	previous_tab = tab
-	yield(get_tree(), "idle_frame")
-	yield(get_tree(), "idle_frame")
-	scroll.scroll_vertical = scrolls[tabs.current_tab]
+	refresh_tabs()
 
 func refresh_tabs():
 	for c in slot_container.get_children():
@@ -86,36 +84,36 @@ func refresh_tabs():
 		add_tab_label.hide()
 		drag_label.show()
 	
-	var tab_scenes = scenes[scenes.keys()[tabs.current_tab]]
+	var tab_data: Dictionary = data[tabs.current_tab]
+	var scenes: Array = tab_data.scenes
 	
-	for i in ceil((tab_scenes.size() + 1) / 5.0) * 5:
+	for i in ceil((scenes.size() + 1) / 5.0) * 5:
 		var slot = add_slot(i)
 		
-		if i < tab_scenes.size() and tab_scenes[i]:
-			slot.set_scene(tab_scenes[i])
-			
-			var icon = icon_cache.get(tab_scenes[i], null)
-			if icon:
-				slot.set_texture(icon)
-			else:
-				var instance = load(tab_scenes[i]).instance()
-				generate_icon(instance as Node2D, slot)
+		if i < scenes.size() and not scenes[i].empty():
+			slot.set_scene(scenes[i].name, scenes[i].get("custom_icon", ""))
+	
+	scroll.scroll_vertical - tab_data.scroll
 
 func scene_set(scene: String, slot: int):
-	var tab_scenes = scenes[scenes.keys()[tabs.current_tab]]
+	var tab_scenes: Array = data[tabs.current_tab].scenes
 	if tab_scenes.size() <= slot:
+		var prev_size := tab_scenes.size()
 		tab_scenes.resize(slot + 1)
+		for i in range(prev_size, slot + 1):
+			tab_scenes[i] = {}
 	
-	tab_scenes[slot] = scene
+	tab_scenes[slot] = {name = scene}
+	ProjectSettings.save()
 	
 	if slot == slot_container.get_child_count() - 1:
 		for i in 5:
 			add_slot(slot + i + 1)
 
 func remove_scene(slot: int):
-	var tab_scenes = scenes[scenes.keys()[tabs.current_tab]]
-	tab_scenes[slot] = ""
-	while not tab_scenes.empty() and tab_scenes.back() == "":
+	var tab_scenes: Array = data[tabs.current_tab].scenes
+	tab_scenes[slot] = {}
+	while not tab_scenes.empty() and tab_scenes.back().empty():
 		tab_scenes.pop_back()
 
 func _process(delta: float) -> void:
@@ -123,19 +121,19 @@ func _process(delta: float) -> void:
 		set_process(false)
 		return
 	
-	var instance = icon_queue.front()[0]
-	var slot = icon_queue.front()[1]
+	var instance: Node = icon_queue.front()[0]
+	var slot: Control = icon_queue.front()[1]
 	
 	while not is_instance_valid(slot):
 		icon_progress = 0
 		icon_queue.pop_front()
 		instance.free()
 		
-		if not icon_queue.empty():
+		if icon_queue.empty():
+			return
+		else:
 			instance = icon_queue.front()[0]
 			slot = icon_queue.front()[1]
-		else:
-			return
 	
 	match icon_progress:
 		0:
@@ -153,7 +151,16 @@ func _process(delta: float) -> void:
 	
 	icon_progress += 1
 
-func generate_icon(instance: Node2D, slot: Control):
+func set_icon(scene_path: String, slot: Control, ignore_cache = false):
+	if not ignore_cache:
+		var icon := icon_cache.get(scene_path, null) as Texture
+		if icon:
+			slot.set_texture(icon)
+			return
+	generate_icon(scene_path, slot)
+
+func generate_icon(scene_path: String, slot: Control):
+	var instance: Node = load(scene_path).instance()
 	icon_queue.append([instance, slot])
 	set_process(true)
 
@@ -161,7 +168,7 @@ func add_slot(scene_id: int) -> Control:
 	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instance()
 	slot.plugin = plugin
 	slot_container.add_child(slot)
-	slot.connect("request_icon", self, "generate_icon", [slot])
+	slot.connect("request_icon", self, "set_icon", [slot])
 	slot.connect("scene_set", self, "scene_set", [scene_id])
 	slot.connect("remove_scene", self, "remove_scene", [scene_id])
 	return slot
