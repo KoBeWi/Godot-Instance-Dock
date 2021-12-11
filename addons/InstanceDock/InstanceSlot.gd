@@ -66,9 +66,10 @@ func create_popup():
 	popup.clear()
 	popup.add_item("Open Scene", MenuOption.EDIT)
 	popup.add_item("Remove", MenuOption.REMOVE)
-	popup.add_item("Refresh Icon", MenuOption.REFRESH)
 	if custom_texture:
 		popup.add_item("Remove Custom Icon", MenuOption.CLEAR)
+	else:
+		popup.add_item("Refresh Icon", MenuOption.REFRESH)
 	popup.rect_size = Vector2()
 
 func menu_option(id: int) -> void:
