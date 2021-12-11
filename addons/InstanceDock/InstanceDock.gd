@@ -143,7 +143,8 @@ func _process(delta: float) -> void:
 	match icon_progress:
 		0:
 			icon_generator.add_child(instance)
-			instance.position = PREVIEW_SIZE * 0.5
+			if instance is Node2D:
+				instance.position = PREVIEW_SIZE * 0.5
 		3:
 			var texture = ImageTexture.new()
 			texture.create_from_image(icon_generator.get_texture().get_data())
