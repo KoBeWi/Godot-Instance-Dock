@@ -65,7 +65,7 @@ visible = false
 margin_top = 22.0
 margin_right = 336.0
 margin_bottom = 36.0
-text = "Drag scene on slot to assign"
+text = "Drag scene from file system on a slot to assign"
 autowrap = true
 
 [node name="Control" type="Control" parent="."]

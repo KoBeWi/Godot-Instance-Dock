@@ -30,9 +30,10 @@ var plugin: EditorPlugin
 
 func _ready() -> void:
 	set_process(false)
-	icon_generator.size = PREVIEW_SIZE
 	
 	if not edited:
+		icon_generator.size = PREVIEW_SIZE
+		
 		if ProjectSettings.has_setting(PROJECT_SETTING):
 			data = ProjectSettings.get_setting(PROJECT_SETTING)
 		else:
