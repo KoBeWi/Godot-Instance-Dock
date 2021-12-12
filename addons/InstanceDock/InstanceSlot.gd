@@ -1,10 +1,14 @@
 tool
 extends PanelContainer
 
+export var normal: StyleBox
+export var custom: StyleBox
+
 enum MenuOption {EDIT, REMOVE, REFRESH, CLEAR}
 
-onready var icon := $TextureRect
+onready var icon := $Icon
 onready var popup := $PopupMenu
+onready var loading := $Loading/AnimationPlayer
 
 var plugin: EditorPlugin
 var scene: String
@@ -29,7 +33,7 @@ func drop_data(position: Vector2, data) -> void:
 	var file: String = data.files[0]
 	if file.get_extension() == "png" and scene:
 		custom_texture = file
-		set_icon(load(file))
+		apply_data()
 		emit_signal("changed")
 	elif file.get_extension() == "tscn":
 		if "from_slot" in data:
@@ -51,6 +55,29 @@ func get_drag_data(position: Vector2):
 
 func set_icon(texture: Texture):
 	icon.texture = texture
+	
+	if loading.get_parent().visible:
+		icon.hide()
+		Thread.new().start(self, "check_if_transparent", texture.get_data())
+
+func check_if_transparent(data: Image):
+	var is_valid: bool
+	data.lock()
+	for x in data.get_width():
+		for y in data.get_height():
+			if data.get_pixel(x, y).a > 0:
+				is_valid = true
+				break
+		
+		if is_valid:
+			break
+	
+	icon.show()
+	loading.get_parent().hide()
+	loading.stop()
+	
+	if not is_valid:
+		set_icon(preload("res://addons/InstanceDock/Missing.png"))
 
 func _gui_input(event: InputEvent) -> void:
 	if not scene:
@@ -82,6 +109,7 @@ func menu_option(id: int) -> void:
 			apply_data()
 			emit_signal("changed")
 		MenuOption.REFRESH:
+			start_load()
 			emit_signal("request_icon", scene, true)
 		MenuOption.CLEAR:
 			custom_texture = ""
@@ -105,10 +133,17 @@ func set_data(data: Dictionary):
 func apply_data():
 	hint_tooltip = scene.get_file()
 	set_icon(null)
+	add_stylebox_override("panel", normal)
 	
 	if scene.empty():
 		set_icon(null)
 	elif custom_texture.empty():
+		start_load()
 		emit_signal("request_icon", scene, false)
 	else:
 		set_icon(load(custom_texture))
+		add_stylebox_override("panel", custom)
+
+func start_load():
+	loading.play("Rotate")
+	loading.get_parent().show()

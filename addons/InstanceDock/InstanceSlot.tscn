@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://addons/InstanceDock/InstanceSlot.gd" type="Script" id=1]
+[ext_resource path="res://addons/InstanceDock/Loading.png" type="Texture" id=3]
 
 [sub_resource type="StyleBoxFlat" id=1]
 content_margin_left = 2.0
@@ -13,23 +14,94 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id=4]
+content_margin_left = 2.0
+content_margin_right = 2.0
+content_margin_top = 2.0
+content_margin_bottom = 2.0
+bg_color = Color( 0, 0, 0, 0.501961 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 1, 1, 1, 0.25098 )
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="Animation" id=2]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 0.0 ]
+}
+
+[sub_resource type="Animation" id=3]
+resource_name = "Rotate"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:rect_rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 0.0, 360.0 ]
+}
+
 [node name="InstanceSlot" type="PanelContainer"]
 margin_right = 64.0
 margin_bottom = 64.0
-rect_min_size = Vector2( 64, 64 )
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+normal = SubResource( 1 )
+custom = SubResource( 4 )
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="Icon" type="TextureRect" parent="."]
 margin_left = 2.0
 margin_top = 2.0
-margin_right = 62.0
-margin_bottom = 62.0
+margin_right = 66.0
+margin_bottom = 66.0
+rect_min_size = Vector2( 64, 64 )
 expand = true
+stretch_mode = 4
+
+[node name="Loading" type="TextureRect" parent="."]
+visible = false
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 66.0
+margin_bottom = 66.0
+rect_pivot_offset = Vector2( 32, 32 )
+texture = ExtResource( 3 )
+stretch_mode = 4
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Loading"]
+anims/RESET = SubResource( 2 )
+anims/Rotate = SubResource( 3 )
 
 [node name="PopupMenu" type="PopupMenu" parent="."]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 66.0
+margin_bottom = 66.0
 
 [connection signal="id_pressed" from="PopupMenu" to="." method="menu_option"]
