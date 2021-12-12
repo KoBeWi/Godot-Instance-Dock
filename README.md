@@ -39,3 +39,5 @@ A tab will load when first visible. Due to Viewports requiring a delay to update
 <img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeLoading.gif" width="190">
 
 If the rendered image comes fully transparent, a special icon will be displayed as placeholder.
+
+btw there is an issue where opening the dock will expand the editor panel abnormally. [This is a Godot bug.](https://github.com/godotengine/godot/issues/43749)
