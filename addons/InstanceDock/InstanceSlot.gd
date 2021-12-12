@@ -54,6 +54,7 @@ func get_drag_data(position: Vector2):
 	return {files = [scene], type = "files", from_slot = get_index()}
 
 func set_icon(texture: Texture):
+	icon.stretch_mode = TextureRect.STRETCH_SCALE
 	icon.texture = texture
 	
 	if loading.get_parent().visible:
@@ -79,6 +80,7 @@ func check_if_transparent(data: Image):
 	
 	if not is_valid:
 		set_icon(preload("res://addons/InstanceDock/Missing.png"))
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 
 func _gui_input(event: InputEvent) -> void:
 	if not scene:

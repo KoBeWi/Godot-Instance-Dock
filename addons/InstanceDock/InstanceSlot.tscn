@@ -79,7 +79,6 @@ margin_right = 66.0
 margin_bottom = 66.0
 rect_min_size = Vector2( 64, 64 )
 expand = true
-stretch_mode = 4
 
 [node name="Loading" type="TextureRect" parent="."]
 visible = false
