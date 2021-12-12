@@ -18,6 +18,7 @@ onready var drag_label := $VBoxContainer/ScrollContainer/VBoxContainer/Label2
 onready var icon_generator := $Viewport
 
 var data: Array
+var initialized: bool
 
 var icon_cache: Dictionary
 var previous_tab: int
@@ -41,8 +42,15 @@ func _ready() -> void:
 		
 		for tab in data:
 			tabs.add_tab(tab.name)
-		
-		refresh_tab_contents()
+
+func _notification(what: int) -> void:
+	if initialized:
+		return
+	
+	if what == NOTIFICATION_VISIBILITY_CHANGED:
+		if is_visible_in_tree():
+			refresh_tab_contents()
+			initialized = true
 
 func on_add_tab_pressed() -> void:
 	tab_add_name.text = ""
