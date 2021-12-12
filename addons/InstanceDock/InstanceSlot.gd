@@ -72,6 +72,7 @@ func check_if_transparent(data: Image):
 		if is_valid:
 			break
 	
+	data.unlock()
 	icon.show()
 	loading.get_parent().hide()
 	loading.stop()
