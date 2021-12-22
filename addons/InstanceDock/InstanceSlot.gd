@@ -22,7 +22,7 @@ func _ready() -> void:
 	set_process(false)
 
 func _process(delta: float) -> void:
-	if thread == null or not thread.is_active():
+	if not thread.is_active():
 		thread.wait_to_finish()
 		thread = null
 		set_process(false)
