@@ -13,9 +13,19 @@ onready var loading := $Loading/AnimationPlayer
 var plugin: EditorPlugin
 var scene: String
 var custom_texture: String
+var thread: Thread
 
 signal request_icon(instance, ignore_cache)
 signal changed
+
+func _ready() -> void:
+	set_process(false)
+
+func _process(delta: float) -> void:
+	if thread == null or not thread.is_active():
+		thread.wait_to_finish()
+		thread = null
+		set_process(false)
 
 func can_drop_data(position: Vector2, data) -> bool:
 	if not "type" in data:
@@ -59,7 +69,9 @@ func set_icon(texture: Texture):
 	
 	if loading.get_parent().visible:
 		icon.hide()
-		Thread.new().start(self, "check_if_transparent", texture.get_data())
+		thread = Thread.new()
+		thread.start(self, "check_if_transparent", texture.get_data())
+		set_process(true)
 
 func check_if_transparent(data: Image):
 	var is_valid: bool
