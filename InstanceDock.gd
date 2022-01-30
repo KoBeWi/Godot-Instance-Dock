@@ -179,7 +179,7 @@ func generate_icon(scene_path: String, slot: Control):
 	set_process(true)
 
 func add_slot() -> Control:
-	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instance()
+	var slot = preload("InstanceSlot.tscn").instance()
 	slot.plugin = plugin
 	slot_container.add_child(slot)
 	slot.connect("request_icon", self, "assign_icon", [slot])

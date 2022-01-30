@@ -91,7 +91,7 @@ func check_if_transparent(data: Image):
 	loading.stop()
 	
 	if not is_valid:
-		set_icon(preload("res://addons/InstanceDock/Missing.png"))
+		set_icon(preload("Missing.png"))
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 
 func _gui_input(event: InputEvent) -> void:

@@ -4,7 +4,7 @@ extends EditorPlugin
 var dock: Control
 
 func _enter_tree():
-	dock = preload("res://addons/InstanceDock/InstanceDock.tscn").instance()
+	dock = preload("InstanceDock.tscn").instance()
 	dock.edited = false
 	dock.plugin = self
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_UR, dock)

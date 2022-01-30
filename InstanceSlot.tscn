@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://addons/InstanceDock/InstanceSlot.gd" type="Script" id=1]
-[ext_resource path="res://addons/InstanceDock/Loading.png" type="Texture" id=3]
+[ext_resource path="InstanceSlot.gd" type="Script" id=1]
+[ext_resource path="Loading.png" type="Texture" id=3]
 
 [sub_resource type="StyleBoxFlat" id=1]
 content_margin_left = 2.0
