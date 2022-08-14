@@ -1,21 +1,20 @@
-tool
+@tool
 extends PanelContainer
-var edited := true
 
 const PROJECT_SETTING = "addons/instance_dock/scenes"
-const PREVIEW_SIZE = Vector2(64, 64)
+const PREVIEW_SIZE = Vector2i(64, 64)
 
-onready var tabs := $VBoxContainer/HBoxContainer/Tabs as Tabs
-onready var tab_add_confirm := $Control/ConfirmationDialog2
-onready var tab_add_name := tab_add_confirm.get_node("LineEdit")
-onready var tab_delete_confirm := $Control/ConfirmationDialog
+@onready var tabs := %Tabs
+@onready var tab_add_confirm := %AddTabConfirm
+@onready var tab_add_name := %AddTabName
+@onready var tab_delete_confirm := %DeleteConfirm
 
-onready var scroll := $VBoxContainer/ScrollContainer
-onready var slot_container := $VBoxContainer/ScrollContainer/VBoxContainer/GridContainer
-onready var add_tab_label := $VBoxContainer/ScrollContainer/VBoxContainer/Label
-onready var drag_label := $VBoxContainer/ScrollContainer/VBoxContainer/Label2
+@onready var scroll := %ScrollContainer
+@onready var slot_container := %Slots
+@onready var add_tab_label := %AddTabLabel
+@onready var drag_label := %DragLabel
 
-onready var icon_generator := $Viewport
+@onready var icon_generator := $Viewport
 
 var data: Array
 var initialized: bool
@@ -32,7 +31,7 @@ var plugin: EditorPlugin
 func _ready() -> void:
 	set_process(false)
 	
-	if not edited:
+	if plugin:
 		icon_generator.size = PREVIEW_SIZE
 		
 		if ProjectSettings.has_setting(PROJECT_SETTING):
@@ -48,14 +47,14 @@ func _notification(what: int) -> void:
 		return
 	
 	if what == NOTIFICATION_VISIBILITY_CHANGED:
-		if is_visible_in_tree():
+		if is_visible_in_tree() and slot_container != null:
 			refresh_tab_contents()
 			initialized = true
 
 func on_add_tab_pressed() -> void:
 	tab_add_name.text = ""
-	tab_add_confirm.popup_centered_minsize()
-	tab_add_name.call_deferred("grab_focus")
+	tab_add_confirm.popup_centered()
+	tab_add_name.grab_focus.call_deferred()
 
 func add_tab_confirm(q = null) -> void:
 	if q != null:
@@ -70,14 +69,13 @@ func add_tab_confirm(q = null) -> void:
 
 func on_tab_close_attempt(tab: int) -> void:
 	tab_to_remove = tab
-	tab_delete_confirm.popup_centered_minsize()
+	tab_delete_confirm.popup_centered()
 
 func remove_tab_confirm() -> void:
 	if tab_to_remove == tabs.current_tab or tabs.get_tab_count() == 1:
-		call_deferred("refresh_tab_contents")
+		refresh_tab_contents.call_deferred()
 	
-	tabs.remove_tab(tab_to_remove)
-	data.remove(tab_to_remove)
+	remove_scene(tab_to_remove)
 	ProjectSettings.save()
 
 func on_tab_changed(tab: int) -> void:
@@ -104,33 +102,21 @@ func refresh_tab_contents():
 	
 	adjust_slot_count()
 	for i in slot_container.get_child_count():
-		if i < scenes.size() and not scenes[i].empty():
+		if i < scenes.size() and not scenes[i].is_empty():
 			slot_container.get_child(i).set_data(scenes[i])
 		else:
 			slot_container.get_child(i).set_data({})
 	
 	scroll.scroll_vertical = tab_data.scroll
 
-func scene_set(scene: String, slot: int):
-	var tab_scenes: Array = data[tabs.current_tab].scenes
-	if tab_scenes.size() <= slot:
-		var prev_size := tab_scenes.size()
-		tab_scenes.resize(slot + 1)
-		for i in range(prev_size, slot + 1):
-			tab_scenes[i] = {}
-	
-	tab_scenes[slot] = {name = scene}
-	ProjectSettings.save()
-	adjust_slot_count()
-
 func remove_scene(slot: int):
 	var tab_scenes: Array = data[tabs.current_tab].scenes
 	tab_scenes[slot] = {}
-	while not tab_scenes.empty() and tab_scenes.back().empty():
+	while not tab_scenes.is_empty() and tab_scenes.back().is_empty():
 		tab_scenes.pop_back()
 
 func _process(delta: float) -> void:
-	if icon_queue.empty():
+	if icon_queue.is_empty():
 		set_process(false)
 		return
 	
@@ -142,7 +128,7 @@ func _process(delta: float) -> void:
 		icon_queue.pop_front()
 		instance.free()
 		
-		if icon_queue.empty():
+		if icon_queue.is_empty():
 			return
 		else:
 			instance = icon_queue.front()[0]
@@ -152,10 +138,9 @@ func _process(delta: float) -> void:
 		0:
 			icon_generator.add_child(instance)
 			if instance is Node2D:
-				instance.position = PREVIEW_SIZE * 0.5
+				instance.position = PREVIEW_SIZE / 2
 		3:
-			var texture = ImageTexture.new()
-			texture.create_from_image(icon_generator.get_texture().get_data())
+			var texture = ImageTexture.create_from_image(icon_generator.get_texture().get_image())
 			slot.set_icon(texture)
 			icon_cache[slot.scene] = texture
 			instance.free()
@@ -167,23 +152,23 @@ func _process(delta: float) -> void:
 
 func assign_icon(scene_path: String, ignore_cache: bool, slot: Control):
 	if not ignore_cache:
-		var icon := icon_cache.get(scene_path, null) as Texture
+		var icon := icon_cache.get(scene_path, null) as Texture2D
 		if icon:
 			slot.set_icon(icon)
 			return
 	generate_icon(scene_path, slot)
 
 func generate_icon(scene_path: String, slot: Control):
-	var instance: Node = load(scene_path).instance()
+	var instance: Node = load(scene_path).instantiate()
 	icon_queue.append([instance, slot])
 	set_process(true)
 
 func add_slot() -> Control:
-	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instance()
+	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instantiate()
 	slot.plugin = plugin
 	slot_container.add_child(slot)
-	slot.connect("request_icon", self, "assign_icon", [slot])
-	slot.connect("changed", self, "recreate_tab_data")
+	slot.request_icon.connect(assign_icon.bind(slot))
+	slot.changed.connect(recreate_tab_data, CONNECT_DEFERRED)
 	return slot
 
 func recreate_tab_data():
@@ -193,15 +178,15 @@ func recreate_tab_data():
 	for slot in slot_container.get_children():
 		tab_scenes.append(slot.get_data())
 	
-	while not tab_scenes.empty() and tab_scenes.back().empty():
+	while not tab_scenes.is_empty() and tab_scenes.back().is_empty():
 		tab_scenes.pop_back()
 	
 	ProjectSettings.save()
 	adjust_slot_count()
 
 func adjust_slot_count():
-	var tab_scenes: Array = data[tabs.current_tab].scenes
-	var desired_slots: int = ceil((tab_scenes.size() + 1) / 5.0) * 5
+	var tab_scenes: Array[Dictionary] = data[tabs.current_tab].scenes
+	var desired_slots := tab_scenes.size() + 1
 	
 	while desired_slots > slot_container.get_child_count():
 		add_slot()
