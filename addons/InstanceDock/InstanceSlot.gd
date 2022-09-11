@@ -153,7 +153,7 @@ func set_data(data: Dictionary):
 	apply_data()
 
 func apply_data():
-	hint_tooltip = scene.get_file()
+	tooltip_text = scene.get_file()
 	set_icon(null)
 	add_theme_stylebox_override(&"panel", normal)
 	
