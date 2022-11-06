@@ -39,14 +39,14 @@ func _can_drop_data(position: Vector2, data) -> bool:
 	if data.files.size() != 1:
 		return false
 	
-	return data.files[0].get_extension() == "tscn" or data.files[0].get_extension() == "png"
+	return data.files[0].get_extension() == "tscn" or data.files[0].get_extension() == "png" and not scene.is_empty()
 
 func _drop_data(position: Vector2, data) -> void:
 	var file: String = data.files[0]
 	if file.get_extension() == "png" and not scene.is_empty():
 		custom_texture = file
 		apply_data()
-		emit_signal("changed")
+		changed.emit()
 	elif file.get_extension() == "tscn":
 		if "from_slot" in data:
 			var slot2: Control = get_parent().get_child(data.from_slot)
@@ -57,7 +57,7 @@ func _drop_data(position: Vector2, data) -> void:
 			scene = file
 			custom_texture = ""
 			apply_data()
-		emit_signal("changed")
+		changed.emit()
 
 func _get_drag_data(position: Vector2):
 	if scene.is_empty():

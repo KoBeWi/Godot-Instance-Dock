@@ -23,8 +23,9 @@ var icon_cache: Dictionary
 var previous_tab: int
 
 var tab_to_remove: int
-var icon_queue: Array
+var icon_queue: Array[Dictionary]
 var icon_progress: int
+var current_processed_item: Dictionary
 
 var plugin: EditorPlugin
 
@@ -116,23 +117,26 @@ func remove_scene(slot: int):
 		tab_scenes.pop_back()
 
 func _process(delta: float) -> void:
-	if icon_queue.is_empty():
+	if icon_queue.is_empty() and current_processed_item.is_empty():
 		set_process(false)
 		return
 	
-	var instance: Node = icon_queue.front()[0]
-	var slot: Control = icon_queue.front()[1]
+	if current_processed_item.is_empty():
+		get_item_from_queue()
+	
+	var instance: Node = current_processed_item.instance
+	var slot = current_processed_item.slot
 	
 	while not is_instance_valid(slot):
 		icon_progress = 0
-		icon_queue.pop_front()
 		instance.free()
+		get_item_from_queue()
 		
-		if icon_queue.is_empty():
+		if current_processed_item.is_empty():
 			return
 		else:
-			instance = icon_queue.front()[0]
-			slot = icon_queue.front()[1]
+			instance = current_processed_item.instance
+			slot = current_processed_item.slot
 	
 	match icon_progress:
 		0:
@@ -146,21 +150,28 @@ func _process(delta: float) -> void:
 			instance.free()
 			
 			icon_progress = -1
-			icon_queue.pop_front()
+			get_item_from_queue()
 	
 	icon_progress += 1
 
+func get_item_from_queue():
+	if icon_queue.is_empty():
+		current_processed_item = {}
+		return
+	
+	current_processed_item = icon_queue.pop_front()
+	current_processed_item.instance = load(current_processed_item.scene).instantiate()
+
 func assign_icon(scene_path: String, ignore_cache: bool, slot: Control):
 	if not ignore_cache:
-		var icon := icon_cache.get(scene_path, null) as Texture2D
+		var icon := icon_cache.get(scene_path) as Texture2D
 		if icon:
 			slot.set_icon(icon)
 			return
 	generate_icon(scene_path, slot)
 
 func generate_icon(scene_path: String, slot: Control):
-	var instance: Node = load(scene_path).instantiate()
-	icon_queue.append([instance, slot])
+	icon_queue.append({scene = scene_path, slot = slot})
 	set_process(true)
 
 func add_slot() -> Control:

@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://ba54n4w4qb18j"]
 
 [ext_resource type="Script" path="res://addons/InstanceDock/InstanceSlot.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://cqfddrhndadkp" path="res://addons/InstanceDock/Loading.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://dlxgnaypnodk" path="res://addons/InstanceDock/Loading.png" id="3"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 content_margin_left = 2.0
@@ -73,6 +73,7 @@ custom = SubResource("4")
 
 [node name="Icon" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
 offset_left = 2.0
 offset_top = 2.0
 offset_right = 66.0
