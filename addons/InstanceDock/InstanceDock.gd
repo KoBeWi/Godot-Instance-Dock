@@ -17,7 +17,7 @@ const PREVIEW_SIZE = Vector2i(64, 64)
 @onready var icon_generator := $Viewport
 
 var data: Array
-var initialized: bool
+var initialized: int
 
 var icon_cache: Dictionary
 var previous_tab: int
@@ -44,13 +44,16 @@ func _ready() -> void:
 			tabs.add_tab(tab.name)
 
 func _notification(what: int) -> void:
-	if initialized:
+	if initialized == 2:
 		return
 	
+	if what == NOTIFICATION_ENTER_TREE:
+		initialized = 1
+	
 	if what == NOTIFICATION_VISIBILITY_CHANGED:
-		if is_visible_in_tree() and slot_container != null:
+		if is_visible_in_tree() and slot_container != null and initialized == 1:
 			refresh_tab_contents()
-			initialized = true
+			initialized = 2
 
 func on_add_tab_pressed() -> void:
 	tab_add_name.text = ""
@@ -82,7 +85,9 @@ func remove_tab_confirm() -> void:
 func on_tab_changed(tab: int) -> void:
 	data[previous_tab].scroll = scroll.scroll_vertical
 	previous_tab = tab
-	refresh_tab_contents()
+	
+	if initialized == 2:
+		refresh_tab_contents()
 
 func refresh_tab_contents():
 	for c in slot_container.get_children():
