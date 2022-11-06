@@ -9,6 +9,10 @@ The scenes are organized into custom tabs. You can add a scene to the dock using
 
 <img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeDragAndDrop.gif" width="450">
 
+You can also assign using the Quick Load menu:
+
+<img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeQuickLoad.gif" width="450">
+
 You can use drag and drop within the dock too to rearrage the scenes. When you fill a row, a new row will appear automatically:
 
 <img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeRow.gif" width="245">

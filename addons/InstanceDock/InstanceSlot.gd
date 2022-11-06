@@ -4,13 +4,14 @@ extends PanelContainer
 @export var normal: StyleBox
 @export var custom: StyleBox
 
-enum MenuOption {EDIT, REMOVE, REFRESH, CLEAR}
+enum MenuOption {EDIT, REMOVE, REFRESH, CLEAR, QUICK_LOAD}
 
 @onready var icon := $Icon
 @onready var loading_icon = $Loading
 @onready var loading_animator := %AnimationPlayer
 
 var popup: PopupMenu
+var resource_picker: EditorResourcePicker
 
 var plugin: EditorPlugin
 var scene: String
@@ -22,6 +23,15 @@ signal changed
 
 func _ready() -> void:
 	set_process(false)
+	
+	resource_picker = EditorResourcePicker.new()
+	add_child(resource_picker)
+	resource_picker.hide()
+	resource_picker.base_type = "PackedScene"
+	resource_picker.resource_changed.connect(func(res: Resource):
+		set_data({scene = res.resource_path})
+		changed.emit()
+	)
 
 func _process(delta: float) -> void:
 	if not thread.is_alive():
@@ -95,15 +105,12 @@ func check_if_transparent(data: Image):
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 
 func _gui_input(event: InputEvent) -> void:
-	if scene.is_empty():
-		return
-	
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 			create_popup()
 			popup.popup()
 			popup.position = get_screen_transform() * event.position
-		elif event.double_click and event.button_index == MOUSE_BUTTON_LEFT:
+		elif event.double_click and event.button_index == MOUSE_BUTTON_LEFT and not scene.is_empty():
 			menu_option(MenuOption.EDIT)
 
 func create_popup():
@@ -113,12 +120,17 @@ func create_popup():
 		add_child(popup)
 	
 	popup.clear()
-	popup.add_item("Open Scene", MenuOption.EDIT)
-	popup.add_item("Remove", MenuOption.REMOVE)
-	if custom_texture:
-		popup.add_item("Remove Custom Icon", MenuOption.CLEAR)
-	else:
-		popup.add_item("Refresh Icon", MenuOption.REFRESH)
+	
+	if not scene.is_empty():
+		popup.add_item("Open Scene", MenuOption.EDIT)
+		popup.add_item("Remove", MenuOption.REMOVE)
+		if custom_texture:
+			popup.add_item("Remove Custom Icon", MenuOption.CLEAR)
+		else:
+			popup.add_item("Refresh Icon", MenuOption.REFRESH)
+	
+	popup.add_item("Quick Load", MenuOption.QUICK_LOAD)
+	
 	popup.reset_size()
 
 func menu_option(id: int) -> void:
@@ -137,6 +149,23 @@ func menu_option(id: int) -> void:
 			custom_texture = ""
 			changed.emit()
 			apply_data()
+		MenuOption.QUICK_LOAD:
+			var popup: Popup
+			
+			if resource_picker.get_child_count() < 3:
+				var fake_click := InputEventMouseButton.new()
+				fake_click.pressed = true
+				fake_click.button_index = MOUSE_BUTTON_RIGHT
+				
+				var edit_button: Button = resource_picker.get_child(1)
+				edit_button.gui_input.emit(fake_click)
+				
+				popup = resource_picker.get_child(2)
+				popup.hide()
+			else:
+				popup = resource_picker.get_child(2)
+			
+			popup.id_pressed.emit(1)
 
 func get_data() -> Dictionary:
 	if scene.is_empty():
