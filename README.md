@@ -23,7 +23,7 @@ Every scene slot has a right-click menu:
 
 - Open Scene: Opens the scene in editor.
 - Remove: Removes the scene from slot.
-- Refresh Icon: Forces the scene icon to refresh. The icons are cached, so if you edit scene, you need to refresh the preview (or restart the editor).
+- Refresh Icon: Forces the scene icon to refresh. The icons are cached, so if you edit a scene, you need to refresh the preview.
 
 You can also assign a custom icon to the scene:
 
@@ -44,7 +44,7 @@ A tab will load when first visible. Due to Viewports requiring a delay to update
 
 If the rendered image comes fully transparent, a special icon will be displayed as placeholder.
 
-btw there is an issue where opening the dock will expand the editor panel abnormally. [This is a Godot bug.](https://github.com/godotengine/godot/issues/43749)
+After first load, the image will be cached in ".godot/InstanceIconCache" folder, so subsequent loads are much faster.
 
 ___
 You can find all my addons on my [profile page](https://github.com/KoBeWi).

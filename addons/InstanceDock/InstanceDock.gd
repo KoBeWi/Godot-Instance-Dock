@@ -31,6 +31,7 @@ var plugin: EditorPlugin
 
 func _ready() -> void:
 	set_process(false)
+	DirAccess.make_dir_recursive_absolute(".godot/InstanceIconCache")
 	
 	if plugin:
 		icon_generator.size = PREVIEW_SIZE
@@ -129,8 +130,15 @@ func _process(delta: float) -> void:
 	if current_processed_item.is_empty():
 		get_item_from_queue()
 	
-	var instance: Node = current_processed_item.instance
 	var slot = current_processed_item.slot
+	
+	if "png" in current_processed_item:
+		icon_cache[slot.scene] = current_processed_item.png
+		slot.set_icon(current_processed_item.png)
+		get_item_from_queue()
+		return
+	
+	var instance: Node = current_processed_item.instance
 	
 	while not is_instance_valid(slot):
 		icon_progress = 0
@@ -149,7 +157,9 @@ func _process(delta: float) -> void:
 			if instance is Node2D:
 				instance.position = PREVIEW_SIZE / 2
 		3:
-			var texture = ImageTexture.create_from_image(icon_generator.get_texture().get_image())
+			var image = icon_generator.get_texture().get_image()
+			image.save_png(".godot/InstanceIconCache/%s.png" % slot.scene.hash())
+			var texture = ImageTexture.create_from_image(image)
 			slot.set_icon(texture)
 			icon_cache[slot.scene] = texture
 			instance.free()
@@ -165,7 +175,11 @@ func get_item_from_queue():
 		return
 	
 	current_processed_item = icon_queue.pop_front()
-	current_processed_item.instance = load(current_processed_item.scene).instantiate()
+	if "png" in current_processed_item:
+		var texture := ImageTexture.create_from_image(Image.load_from_file(current_processed_item.png))
+		current_processed_item.png = texture
+	else:
+		current_processed_item.instance = load(current_processed_item.scene).instantiate()
 
 func assign_icon(scene_path: String, ignore_cache: bool, slot: Control):
 	if not ignore_cache:
@@ -173,6 +187,12 @@ func assign_icon(scene_path: String, ignore_cache: bool, slot: Control):
 		if icon:
 			slot.set_icon(icon)
 			return
+		else:
+			var hash := scene_path.hash()
+			if FileAccess.file_exists(".godot/InstanceIconCache/%s.png" % hash):
+				icon_queue.append({png = ".godot/InstanceIconCache/%s.png" % hash, slot = slot})
+				set_process(true)
+				return
 	generate_icon(scene_path, slot)
 
 func generate_icon(scene_path: String, slot: Control):
