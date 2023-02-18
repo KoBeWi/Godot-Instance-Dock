@@ -10,44 +10,30 @@ script = ExtResource("2")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
-offset_right = 350.0
-offset_bottom = 1080.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
-offset_right = 350.0
-offset_bottom = 38.0
 size_flags_horizontal = 3
 
 [node name="Tabs" type="TabBar" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-offset_right = 322.0
-offset_bottom = 38.0
 size_flags_horizontal = 3
 tab_close_display_policy = 1
 drag_to_rearrange_enabled = true
 
 [node name="Button" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-offset_left = 326.0
-offset_right = 350.0
-offset_bottom = 38.0
 text = "+"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-offset_top = 42.0
-offset_right = 350.0
-offset_bottom = 1080.0
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
 layout_mode = 2
-offset_right = 350.0
-offset_bottom = 1038.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
@@ -55,14 +41,11 @@ size_flags_vertical = 3
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-offset_right = 336.0
 size_flags_horizontal = 3
 
 [node name="AddTabLabel" type="Label" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-offset_right = 350.0
-offset_bottom = 33.0
 text = "Add tab to continue"
 autowrap_mode = 2
 
@@ -70,9 +53,6 @@ autowrap_mode = 2
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-offset_top = 22.0
-offset_right = 336.0
-offset_bottom = 36.0
 text = "Drag scene from file system on a slot to assign"
 autowrap_mode = 2
 

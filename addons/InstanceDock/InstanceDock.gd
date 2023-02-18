@@ -221,7 +221,8 @@ func recreate_tab_data():
 	adjust_slot_count()
 
 func adjust_slot_count():
-	var tab_scenes: Array[Dictionary] = data[tabs.current_tab].scenes
+	var tab_scenes: Array[Dictionary]
+	tab_scenes.assign(data[tabs.current_tab].scenes)
 	var desired_slots := tab_scenes.size() + 1
 	
 	while desired_slots > slot_container.get_child_count():
