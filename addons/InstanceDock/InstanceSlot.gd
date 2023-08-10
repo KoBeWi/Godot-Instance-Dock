@@ -96,6 +96,9 @@ func check_if_transparent(data: Image):
 		if is_valid:
 			break
 	
+	transparent_result.call_deferred(is_valid)
+
+func transparent_result(is_valid: bool):
 	icon.modulate.a = 1
 	loading_icon.hide()
 	loading_animator.stop()
