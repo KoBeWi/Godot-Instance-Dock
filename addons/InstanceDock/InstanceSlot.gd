@@ -76,8 +76,10 @@ func _get_drag_data(position: Vector2):
 	return {files = [scene], type = "files", from_slot = get_index()}
 
 func set_icon(texture: Texture2D):
-	icon.stretch_mode = TextureRect.STRETCH_SCALE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.texture = texture
+	if texture and texture.get_width() <= icon.size.x:
+		icon.texture_filter = TEXTURE_FILTER_NEAREST
 	
 	if loading_icon.visible:
 		icon.modulate.a = 0
