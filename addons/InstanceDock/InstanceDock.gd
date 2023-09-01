@@ -22,7 +22,7 @@ var initialized: int
 var icon_cache: Dictionary
 var previous_tab: int
 
-var tab_to_remove: int
+var tab_to_remove := -1
 var icon_queue: Array[Dictionary]
 var icon_progress: int
 var current_processed_item: Dictionary
@@ -77,14 +77,16 @@ func on_tab_close_attempt(tab: int) -> void:
 	tab_delete_confirm.popup_centered()
 
 func remove_tab_confirm() -> void:
-	if tab_to_remove == tabs.current_tab or tabs.get_tab_count() == 1:
-		refresh_tab_contents.call_deferred()
-	
-	remove_scene(tab_to_remove)
+	if tab_to_remove != tabs.current_tab:
+		tab_to_remove = -1
+	data.remove_at(tab_to_remove)
+	tabs.remove_tab(tab_to_remove)
 	ProjectSettings.save()
 
 func on_tab_changed(tab: int) -> void:
-	data[previous_tab].scroll = scroll.scroll_vertical
+	if tab_to_remove == -1:
+		data[previous_tab].scroll = scroll.scroll_vertical
+	tab_to_remove = -1
 	previous_tab = tab
 	
 	if initialized == 2:

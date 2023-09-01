@@ -65,6 +65,7 @@ dialog_text = "This will permanently remove the tab. Continue?"
 
 [node name="AddTabConfirm" type="ConfirmationDialog" parent="Dialogs"]
 unique_name_in_owner = true
+size = Vector2i(200, 88)
 
 [node name="AddTabName" type="LineEdit" parent="Dialogs/AddTabConfirm"]
 unique_name_in_owner = true
@@ -72,8 +73,8 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = -832.0
-offset_bottom = 53.0
+offset_right = -8.0
+offset_bottom = 39.0
 placeholder_text = "Tab name"
 
 [node name="Viewport" type="SubViewport" parent="."]
