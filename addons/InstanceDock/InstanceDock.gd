@@ -84,7 +84,7 @@ func remove_tab_confirm() -> void:
 	ProjectSettings.save()
 
 func on_tab_changed(tab: int) -> void:
-	if tab_to_remove == -1:
+	if tab_to_remove == -1 and data.size() > 0:
 		data[previous_tab].scroll = scroll.scroll_vertical
 	tab_to_remove = -1
 	previous_tab = tab
@@ -106,17 +106,18 @@ func refresh_tab_contents():
 		add_tab_label.hide()
 		drag_label.show()
 	
-	var tab_data: Dictionary = data[tabs.current_tab]
-	var scenes: Array = tab_data.scenes
+	if data.size() > 0:
+		var tab_data: Dictionary = data[tabs.current_tab]
+		var scenes: Array = tab_data.scenes
 	
-	adjust_slot_count()
-	for i in slot_container.get_child_count():
-		if i < scenes.size() and not scenes[i].is_empty():
-			slot_container.get_child(i).set_data(scenes[i])
-		else:
-			slot_container.get_child(i).set_data({})
+		adjust_slot_count()
+		for i in slot_container.get_child_count():
+			if i < scenes.size() and not scenes[i].is_empty():
+				slot_container.get_child(i).set_data(scenes[i])
+			else:
+				slot_container.get_child(i).set_data({})
 	
-	scroll.scroll_vertical = tab_data.scroll
+		scroll.scroll_vertical = tab_data.scroll
 
 func remove_scene(slot: int):
 	var tab_scenes: Array = data[tabs.current_tab].scenes

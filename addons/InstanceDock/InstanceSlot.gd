@@ -3,6 +3,7 @@ extends PanelContainer
 
 @export var normal: StyleBox
 @export var custom: StyleBox
+@export var textLabel: RichTextLabel
 
 enum MenuOption {EDIT, REMOVE, REFRESH, CLEAR, QUICK_LOAD}
 
@@ -186,13 +187,21 @@ func set_data(data: Dictionary):
 	custom_texture = data.get("custom_texture", "")
 	apply_data()
 
+func set_text_label(isVisible : bool, text : String = """[center]DRAG
+HERE
++[/center]"""):
+	textLabel.text = text
+	textLabel.visible = isVisible
+
 func apply_data():
 	tooltip_text = scene.get_file()
 	set_icon(null)
+	set_text_label(false)
 	add_theme_stylebox_override(&"panel", normal)
 	
 	if scene.is_empty():
 		set_icon(null)
+		set_text_label(true)
 	elif custom_texture.is_empty():
 		start_load()
 		request_icon.emit(scene, false)
