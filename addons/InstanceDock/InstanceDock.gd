@@ -106,7 +106,8 @@ func refresh_tab_contents():
 		add_tab_label.hide()
 		drag_label.show()
 	
-	if data.size() > 0:
+	if data.is_empty():
+		return
 		var tab_data: Dictionary = data[tabs.current_tab]
 		var scenes: Array = tab_data.scenes
 	
