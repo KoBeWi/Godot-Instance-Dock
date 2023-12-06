@@ -45,6 +45,14 @@ func _ready() -> void:
 			tabs.add_tab(tab.name)
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_BEGIN:
+		var drag_data = get_viewport().gui_get_drag_data()
+		if drag_data is Dictionary and "instance_dock_overrides" in drag_data:
+			get_tree().node_added.connect(node_added)
+	elif what == NOTIFICATION_DRAG_END:
+		if get_tree().node_added.is_connected(node_added):
+			get_tree().node_added.disconnect(node_added)
+	
 	if initialized == 2:
 		return
 	
@@ -55,6 +63,19 @@ func _notification(what: int) -> void:
 		if is_visible_in_tree() and slot_container != null and initialized == 1:
 			refresh_tab_contents()
 			initialized = 2
+
+func node_added(node: Node):
+	var scene := plugin.get_editor_interface().get_edited_scene_root()
+	if not scene or not scene.is_ancestor_of(node):
+		return
+	
+	var drag_data = get_viewport().gui_get_drag_data()
+	if not "files" in drag_data or not node.scene_file_path in drag_data["files"]:
+		return
+	
+	var overrides: Dictionary = drag_data["instance_dock_overrides"]
+	for override in overrides:
+		node.set(override, overrides[override])
 
 func on_add_tab_pressed() -> void:
 	tab_add_name.text = ""
@@ -84,7 +105,7 @@ func remove_tab_confirm() -> void:
 	ProjectSettings.save()
 
 func on_tab_changed(tab: int) -> void:
-	if tab_to_remove == -1:
+	if tab_to_remove == -1 and data.size() > 0:
 		data[previous_tab].scroll = scroll.scroll_vertical
 	tab_to_remove = -1
 	previous_tab = tab
@@ -106,17 +127,18 @@ func refresh_tab_contents():
 		add_tab_label.hide()
 		drag_label.show()
 	
-	var tab_data: Dictionary = data[tabs.current_tab]
-	var scenes: Array = tab_data.scenes
+	if data.size() > 0:
+		var tab_data: Dictionary = data[tabs.current_tab]
+		var scenes: Array = tab_data.scenes
 	
-	adjust_slot_count()
-	for i in slot_container.get_child_count():
-		if i < scenes.size() and not scenes[i].is_empty():
-			slot_container.get_child(i).set_data(scenes[i])
-		else:
-			slot_container.get_child(i).set_data({})
+		adjust_slot_count()
+		for i in slot_container.get_child_count():
+			if i < scenes.size() and not scenes[i].is_empty():
+				slot_container.get_child(i).set_data(scenes[i])
+			else:
+				slot_container.get_child(i).set_data({})
 	
-	scroll.scroll_vertical = tab_data.scroll
+		scroll.scroll_vertical = tab_data.scroll
 
 func remove_scene(slot: int):
 	var tab_scenes: Array = data[tabs.current_tab].scenes
@@ -135,12 +157,16 @@ func _process(delta: float) -> void:
 	var slot = current_processed_item.slot
 	
 	if "png" in current_processed_item:
-		icon_cache[slot.scene] = current_processed_item.png
+		icon_cache[slot.get_hash()] = current_processed_item.png
 		slot.set_icon(current_processed_item.png)
 		get_item_from_queue()
 		return
 	
 	var instance: Node = current_processed_item.instance
+	
+	var overrides: Dictionary = current_processed_item.overrides
+	for override in overrides:
+		instance.set(override, overrides[override])
 	
 	while not is_instance_valid(slot):
 		icon_progress = 0
@@ -160,10 +186,10 @@ func _process(delta: float) -> void:
 				instance.position = PREVIEW_SIZE / 2
 		3:
 			var image = icon_generator.get_texture().get_image()
-			image.save_png(".godot/InstanceIconCache/%s.png" % slot.scene.hash())
+			image.save_png(".godot/InstanceIconCache/%s.png" % slot.get_hash())
 			var texture = ImageTexture.create_from_image(image)
 			slot.set_icon(texture)
-			icon_cache[slot.scene] = texture
+			icon_cache[slot.get_hash()] = texture
 			instance.free()
 			
 			icon_progress = -1
@@ -182,17 +208,19 @@ func get_item_from_queue():
 		current_processed_item.png = texture
 	else:
 		current_processed_item.instance = load(current_processed_item.scene).instantiate()
+		current_processed_item.overrides = current_processed_item.slot.overrides
 
 func assign_icon(scene_path: String, ignore_cache: bool, slot: Control):
 	if not ignore_cache:
-		var icon := icon_cache.get(scene_path) as Texture2D
+		var hash: int = slot.get_hash()
+		var icon := icon_cache.get(hash) as Texture2D
 		if icon:
 			slot.set_icon(icon)
 			return
 		else:
-			var hash := scene_path.hash()
-			if FileAccess.file_exists(".godot/InstanceIconCache/%s.png" % hash):
-				icon_queue.append({png = ".godot/InstanceIconCache/%s.png" % hash, slot = slot})
+			var cache_path := ".godot/InstanceIconCache/%s.png" % hash
+			if FileAccess.file_exists(cache_path):
+				icon_queue.append({ png = cache_path, slot = slot })
 				set_process(true)
 				return
 	generate_icon(scene_path, slot)

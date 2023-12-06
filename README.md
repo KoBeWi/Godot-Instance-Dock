@@ -1,33 +1,38 @@
-# <img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/Icon.png" width="64" height="64"> Godot Instance Dock
+# <img src="Media/Icon.png" width="64" height="64"> Godot Instance Dock
 Addon for Godot that adds a handy dock where you can store scenes.
 
-![](https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/Screenshot1.png)
+![](Media/Screenshot1.png)
 
 ## Cool stuff
 
 The scenes are organized into custom tabs. You can add a scene to the dock using drag and drop and then you can drag it onto your scene, as if dragging the scene file:
 
-<img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeDragAndDrop.gif" width="450">
+<img src="Media/ReadmeDragAndDrop.gif" width="450">
 
 You can also assign using the Quick Load menu:
 
-<img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeQuickLoad.gif" width="450">
+<img src="Media/ReadmeQuickLoad.gif" width="450">
 
 You can use drag and drop within the dock too to rearrage the scenes. When you fill a row, a new row will appear automatically:
 
-<img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeRow.gif" width="245">
+<img src="Media/ReadmeRow.gif" width="245">
 
 Every scene slot has a right-click menu:
 
-![](https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeMenu.png)
+![](Media/ReadmeMenu.png)
 
 - Open Scene: Opens the scene in editor.
+- Override Properties: Edits the instance in the inspector to allow changing its properties. This will not modify the original scene, instance dock keeps this data internally.
 - Remove: Removes the scene from slot.
-- Refresh Icon: Forces the scene icon to refresh. The icons are cached, so if you edit a scene, you need to refresh the preview.
+- Refresh Icon: Forces the scene icon to refresh. The icons are cached, so if you edit a scene, you need to refresh the preview. Icon is refreshed automatically when changing overrides.
+
+Instances with overrides have a green marker in the corner:
+
+![](Media/ReadmeOverride.png)
 
 You can also assign a custom icon to the scene:
 
-<img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeCustom.gif" width="150">
+<img src="Media/ReadmeCustom.gif" width="150">
 
 The icons are generated from scenes. They only support 2D and aren't always 100% accurate. so this option is sometimes useful. Scenes with custom icons have a slight outline.
 
@@ -40,7 +45,7 @@ The default preview size is 64x64. It can be changed in `InstanceDock.gd`. Keep 
 
 A tab will load when first visible. Due to Viewports requiring a delay to update the texture, generating icons for many scenes takes a couple of seconds. A loading icon will be displayed while the preview is loading.
 
-<img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/ReadmeLoading.gif" width="190">
+<img src="ReadmeLoading.gif" width="190">
 
 If the rendered image comes fully transparent, a special icon will be displayed as placeholder.
 

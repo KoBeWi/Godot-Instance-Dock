@@ -46,14 +46,14 @@ size_flags_horizontal = 3
 [node name="AddTabLabel" type="Label" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Add tab to continue"
+text = "Add tab to continue."
 autowrap_mode = 2
 
 [node name="DragLabel" type="Label" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-text = "Drag scene from file system on a slot to assign"
+text = "Drag scene from file system on a slot to assign or right-click to Quick Load."
 autowrap_mode = 2
 
 [node name="Dialogs" type="Node" parent="."]

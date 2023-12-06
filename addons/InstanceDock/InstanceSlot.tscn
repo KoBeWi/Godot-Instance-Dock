@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://ba54n4w4qb18j"]
+[gd_scene load_steps=9 format=3 uid="uid://ba54n4w4qb18j"]
 
 [ext_resource type="Script" path="res://addons/InstanceDock/InstanceSlot.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://cqfddrhndadkp" path="res://addons/InstanceDock/Loading.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://dp0lseq583t66" path="res://addons/InstanceDock/Overrides.png" id="2_l1vpy"]
+[ext_resource type="Texture2D" uid="uid://rsllva5pmojk" path="res://addons/InstanceDock/Loading.png" id="3"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 content_margin_left = 2.0
@@ -63,19 +64,52 @@ _data = {
 "Rotate": SubResource("3")
 }
 
-[node name="InstanceSlot" type="PanelContainer"]
+[node name="InstanceSlot" type="PanelContainer" node_paths=PackedStringArray("textLabel")]
 offset_right = 64.0
 offset_bottom = 64.0
 theme_override_styles/panel = SubResource("1")
 script = ExtResource("1")
 normal = SubResource("1")
 custom = SubResource("4")
+textLabel = NodePath("Icon/RichTextLabel")
 
 [node name="Icon" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 1
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Icon"]
+z_as_relative = false
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -23.0
+offset_bottom = 23.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 4
+mouse_filter = 1
+bbcode_enabled = true
+text = "[center]DRAG
+HERE
++[/center]"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+shortcut_keys_enabled = false
+drag_and_drop_selection_enabled = false
+
+[node name="HasOverrides" type="TextureRect" parent="."]
+visible = false
+texture_filter = 1
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+texture = ExtResource("2_l1vpy")
+stretch_mode = 2
 
 [node name="Loading" type="Sprite2D" parent="."]
 visible = false
@@ -87,3 +121,9 @@ unique_name_in_owner = true
 libraries = {
 "": SubResource("AnimationLibrary_u8ud1")
 }
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

@@ -1,20 +1,26 @@
 @tool
 extends PanelContainer
 
+const InstanceDockPropertyEdit = preload("res://addons/InstanceDock/InstancePropertyEdit.gd")
+
+enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
+
 @export var normal: StyleBox
 @export var custom: StyleBox
-
-enum MenuOption {EDIT, REMOVE, REFRESH, CLEAR, QUICK_LOAD}
+@export var textLabel: RichTextLabel
 
 @onready var icon := $Icon
 @onready var loading_icon = $Loading
 @onready var loading_animator := %AnimationPlayer
+@onready var timer: Timer = $Timer
+@onready var has_overrides: TextureRect = $HasOverrides
 
 var popup: PopupMenu
 var resource_picker: EditorResourcePicker
 
 var plugin: EditorPlugin
 var scene: String
+var overrides: Dictionary
 var custom_texture: String
 var thread: Thread
 
@@ -73,7 +79,7 @@ func _get_drag_data(position: Vector2):
 	if scene.is_empty():
 		return null
 	
-	return {files = [scene], type = "files", from_slot = get_index()}
+	return { files = [scene], type = "files", from_slot = get_index(), instance_dock_overrides = overrides }
 
 func set_icon(texture: Texture2D):
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -128,6 +134,7 @@ func create_popup():
 	
 	if not scene.is_empty():
 		popup.add_item("Open Scene", MenuOption.EDIT)
+		popup.add_item("Override Properties", MenuOption.MODIFY)
 		popup.add_item("Remove", MenuOption.REMOVE)
 		if custom_texture:
 			popup.add_item("Remove Custom Icon", MenuOption.CLEAR)
@@ -142,11 +149,21 @@ func menu_option(id: int) -> void:
 	match id:
 		MenuOption.EDIT:
 			plugin.get_editor_interface().open_scene_from_path(scene)
+		MenuOption.MODIFY:
+			var editor := InstanceDockPropertyEdit.new()
+			editor.instance = load(scene).instantiate()
+			editor.overrides = overrides
+			plugin.get_editor_interface().inspect_object(editor, "", true)
+			editor.changed.connect(timer.start)
 		MenuOption.REMOVE:
 			scene = ""
 			custom_texture = ""
-			apply_data()
+			overrides.clear()
+			if plugin.get_editor_interface().get_inspector().get_edited_object() is InstanceDockPropertyEdit:
+				plugin.get_editor_interface().edit_node(null)
+			
 			changed.emit()
+			apply_data()
 		MenuOption.REFRESH:
 			start_load()
 			request_icon.emit(scene, true)
@@ -176,30 +193,58 @@ func get_data() -> Dictionary:
 	if scene.is_empty():
 		return {}
 	
-	var data := {scene = scene}
+	var data := { scene = scene }
 	if not custom_texture.is_empty():
 		data.custom_texture = custom_texture
+	
+	if not overrides.is_empty():
+		data.overrides = overrides
+	
 	return data
 
 func set_data(data: Dictionary):
 	scene = data.get("scene", "")
 	custom_texture = data.get("custom_texture", "")
+	overrides = data.get("overrides", {})
 	apply_data()
 
+func set_text_label(isVisible : bool):
+	textLabel.visible = isVisible
+	textLabel.set_anchors_and_offsets_preset(Control.PRESET_HCENTER_WIDE)
+
 func apply_data():
-	tooltip_text = scene.get_file()
+	var text: PackedStringArray
+	text.append(scene.get_file())
+	if not overrides.is_empty():
+		text.append("\nOverrides:")
+		for override in overrides:
+			text.append("%s: %s" % [override, overrides[override]])
+	tooltip_text = "\n".join(text)
+	
 	set_icon(null)
+	set_text_label(false)
 	add_theme_stylebox_override(&"panel", normal)
 	
 	if scene.is_empty():
 		set_icon(null)
+		set_text_label(true)
 	elif custom_texture.is_empty():
 		start_load()
 		request_icon.emit(scene, false)
 	else:
 		set_icon(load(custom_texture))
 		add_theme_stylebox_override(&"panel", custom)
+	
+	has_overrides.visible = not overrides.is_empty()
 
 func start_load():
 	loading_animator.play(&"Rotate")
 	loading_icon.show()
+
+func _on_timer_timeout() -> void:
+	has_overrides.visible = not overrides.is_empty()
+	apply_data()
+	menu_option(MenuOption.REFRESH)
+
+func get_hash() -> int:
+	return str(scene, overrides).hash()
