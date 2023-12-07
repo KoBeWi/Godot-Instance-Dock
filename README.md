@@ -34,7 +34,7 @@ You can also assign a custom icon to the scene:
 
 <img src="Media/ReadmeCustom.gif" width="150">
 
-The icons are generated from scenes. They only support 2D and aren't always 100% accurate. so this option is sometimes useful. Scenes with custom icons have a slight outline.
+The icons are generated from scenes. They only support 2D and aren't always 100% accurate, so this option is sometimes useful. Scenes with custom icons have a slight outline.
 
 ## Technical stuff
 

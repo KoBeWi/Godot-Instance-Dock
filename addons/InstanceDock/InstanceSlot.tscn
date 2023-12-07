@@ -64,14 +64,13 @@ _data = {
 "Rotate": SubResource("3")
 }
 
-[node name="InstanceSlot" type="PanelContainer" node_paths=PackedStringArray("textLabel")]
+[node name="InstanceSlot" type="PanelContainer"]
 offset_right = 64.0
 offset_bottom = 64.0
 theme_override_styles/panel = SubResource("1")
 script = ExtResource("1")
 normal = SubResource("1")
 custom = SubResource("4")
-textLabel = NodePath("Icon/RichTextLabel")
 
 [node name="Icon" type="TextureRect" parent="."]
 custom_minimum_size = Vector2(64, 64)
@@ -79,28 +78,22 @@ layout_mode = 2
 mouse_filter = 2
 expand_mode = 1
 
-[node name="RichTextLabel" type="RichTextLabel" parent="Icon"]
+[node name="Label" type="Label" parent="Icon"]
+unique_name_in_owner = true
 z_as_relative = false
 layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
+anchors_preset = 15
 anchor_right = 1.0
-anchor_bottom = 0.5
-offset_top = -23.0
-offset_bottom = 23.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-size_flags_vertical = 4
 mouse_filter = 1
-bbcode_enabled = true
-text = "[center]DRAG
-HERE
-+[/center]"
-fit_content = true
-scroll_active = false
-autowrap_mode = 0
-shortcut_keys_enabled = false
-drag_and_drop_selection_enabled = false
+theme_override_constants/line_spacing = 0
+theme_override_font_sizes/font_size = 12
+text = "Drop scene to assign"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
 
 [node name="HasOverrides" type="TextureRect" parent="."]
 visible = false

@@ -7,13 +7,13 @@ enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
 
 @export var normal: StyleBox
 @export var custom: StyleBox
-@export var textLabel: RichTextLabel
 
 @onready var icon := $Icon
 @onready var loading_icon = $Loading
 @onready var loading_animator := %AnimationPlayer
 @onready var timer: Timer = $Timer
 @onready var has_overrides: TextureRect = $HasOverrides
+@onready var text_label: Label = %Label
 
 var popup: PopupMenu
 var resource_picker: EditorResourcePicker
@@ -208,9 +208,8 @@ func set_data(data: Dictionary):
 	overrides = data.get("overrides", {})
 	apply_data()
 
-func set_text_label(isVisible : bool):
-	textLabel.visible = isVisible
-	textLabel.set_anchors_and_offsets_preset(Control.PRESET_HCENTER_WIDE)
+func set_text_label(vis : bool):
+	text_label.visible = vis
 
 func apply_data():
 	var text: PackedStringArray
