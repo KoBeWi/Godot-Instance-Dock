@@ -1,5 +1,5 @@
 @tool
-extends PanelContainer
+extends Control
 
 const PROJECT_SETTING = "addons/instance_dock/scenes"
 const PREVIEW_SIZE = Vector2i(64, 64)
@@ -13,6 +13,8 @@ const PREVIEW_SIZE = Vector2i(64, 64)
 @onready var slot_container := %Slots
 @onready var add_tab_label := %AddTabLabel
 @onready var drag_label := %DragLabel
+
+@onready var paint_mode: VBoxContainer = %PaintMode
 
 @onready var icon_generator := $Viewport
 
@@ -33,16 +35,18 @@ func _ready() -> void:
 	set_process(false)
 	DirAccess.make_dir_recursive_absolute(".godot/InstanceIconCache")
 	
-	if plugin:
-		icon_generator.size = PREVIEW_SIZE
-		
-		if ProjectSettings.has_setting(PROJECT_SETTING):
-			data = ProjectSettings.get_setting(PROJECT_SETTING)
-		else:
-			ProjectSettings.set_setting(PROJECT_SETTING, data)
-		
-		for tab in data:
-			tabs.add_tab(tab.name)
+	if not plugin:
+		return
+	
+	icon_generator.size = PREVIEW_SIZE
+	
+	if ProjectSettings.has_setting(PROJECT_SETTING):
+		data = ProjectSettings.get_setting(PROJECT_SETTING)
+	else:
+		ProjectSettings.set_setting(PROJECT_SETTING, data)
+	
+	for tab in data:
+		tabs.add_tab(tab.name)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_BEGIN:
@@ -138,8 +142,11 @@ func refresh_tab_contents():
 				slot_container.get_child(i).set_data(scenes[i])
 			else:
 				slot_container.get_child(i).set_data({})
-	
+		
 		scroll.scroll_vertical = tab_data.scroll
+	
+	if paint_mode.enabled:
+		paint_mode.set_paint_mode_enabled(true)
 
 func remove_scene(slot: int):
 	var tab_scenes: Array = data[tabs.current_tab].scenes
@@ -234,6 +241,7 @@ func add_slot() -> Control:
 	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instantiate()
 	slot.plugin = plugin
 	slot_container.add_child(slot)
+	slot.setup_button(paint_mode.buttons)
 	slot.request_icon.connect(assign_icon.bind(slot))
 	slot.changed.connect(recreate_tab_data, CONNECT_DEFERRED)
 	return slot

@@ -14,6 +14,7 @@ enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
 @onready var timer: Timer = $Timer
 @onready var has_overrides: TextureRect = $HasOverrides
 @onready var text_label: Label = %Label
+@onready var paint_button: Button = $PaintButton
 
 var popup: PopupMenu
 var resource_picker: EditorResourcePicker
@@ -234,6 +235,8 @@ func apply_data():
 		set_icon(load(custom_texture))
 		add_theme_stylebox_override(&"panel", custom)
 	
+	paint_button.disabled = scene.is_empty()
+	
 	has_overrides.visible = not overrides.is_empty()
 
 func start_load():
@@ -247,3 +250,6 @@ func _on_timer_timeout() -> void:
 
 func get_hash() -> int:
 	return str(scene, overrides).hash()
+
+func setup_button(group: ButtonGroup):
+	paint_button.button_group = group
