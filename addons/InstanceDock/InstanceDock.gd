@@ -79,6 +79,7 @@ func node_added(node: Node):
 
 func on_add_tab_pressed() -> void:
 	tab_add_name.text = ""
+	tab_add_confirm.reset_size()
 	tab_add_confirm.popup_centered()
 	tab_add_name.grab_focus.call_deferred()
 
@@ -260,3 +261,10 @@ func adjust_slot_count():
 	
 	while desired_slots < slot_container.get_child_count():
 		slot_container.get_child(slot_container.get_child_count() - 1).free()
+
+func on_rearrange(idx_to: int) -> void:
+	var old_data: Dictionary = data[previous_tab]
+	data[previous_tab] = data[idx_to]
+	data[idx_to] = old_data
+	previous_tab = idx_to
+	ProjectSettings.save()

@@ -81,6 +81,7 @@ placeholder_text = "Tab name"
 transparent_bg = true
 render_target_update_mode = 3
 
+[connection signal="active_tab_rearranged" from="VBoxContainer/HBoxContainer/Tabs" to="." method="on_rearrange"]
 [connection signal="tab_changed" from="VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_changed"]
 [connection signal="tab_close_pressed" from="VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_close_attempt"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Button" to="." method="on_add_tab_pressed"]
