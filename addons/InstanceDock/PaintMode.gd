@@ -1,6 +1,8 @@
 @tool
 extends Control
 
+const GRID_SIZE = 7
+
 @onready var plugin: EditorPlugin = owner.plugin
 
 @onready var status: Label = %Status
@@ -109,11 +111,12 @@ func paint_input(event: InputEvent) -> bool:
 	if selected_scene.is_empty():
 		return false
 	
-	if event is InputEventMouse:
+	if event is InputEventMouseMotion:
 		var target_pos := edited_node.get_global_mouse_position()
 		
 		if snap_enabled.button_pressed:
 			preview.global_position = target_pos.snapped(Vector2(snap_x.value, snap_y.value))
+			plugin.update_overlays()
 		else:
 			preview.global_position = target_pos
 	
@@ -143,7 +146,18 @@ func add_instance(parent: Node, own: Node, instance: CanvasItem, pos: Vector2):
 	instance.global_position = pos
 
 func paint_draw(viewport_control: Control):
-	pass
+	if not snap_enabled.button_pressed or not edited_node:
+		return
+	
+	for x in range(-GRID_SIZE / 2, GRID_SIZE / 2 + 1):
+		for y in range(-GRID_SIZE / 2, GRID_SIZE / 2 + 1):
+			var snap_vector := Vector2(snap_x.value, snap_y.value)
+			var canvas_transform := edited_node.get_viewport().global_canvas_transform
+			
+			var pos := edited_node.get_global_mouse_position().snapped(snap_vector)
+			pos += Vector2(x, y) * snap_vector
+			pos = canvas_transform * pos
+			viewport_control.draw_circle(pos, 2, Color(Color.WHITE, 1.0 - absf(x) * 0.2 - absf(y) * 0.2))
 
 func _exit_tree() -> void:
 	if is_instance_valid(preview):
@@ -161,3 +175,6 @@ func update_status():
 	else:
 		status.text = "Use LMB to paint instance"
 		status.modulate = Color.WHITE
+
+func update_overlays() -> void:
+	plugin.update_overlays()
