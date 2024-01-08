@@ -2,7 +2,8 @@
 extends Control
 
 const PROJECT_SETTING = "addons/instance_dock/scenes"
-const PREVIEW_SIZE = Vector2i(64, 64)
+const PROJECT_SETTING2 = "addons/instance_dock/preview_resolution"
+var PREVIEW_SIZE = Vector2i(64, 64)
 
 @onready var tabs := %Tabs
 @onready var tab_add_confirm := %AddTabConfirm
@@ -44,12 +45,18 @@ func _ready() -> void:
 	if not plugin:
 		return
 	
-	icon_generator.size = PREVIEW_SIZE
-	
 	if ProjectSettings.has_setting(PROJECT_SETTING):
 		data = ProjectSettings.get_setting(PROJECT_SETTING)
 	else:
 		ProjectSettings.set_setting(PROJECT_SETTING, data)
+	
+	if ProjectSettings.has_setting(PROJECT_SETTING2):
+		PREVIEW_SIZE = ProjectSettings.get_setting(PROJECT_SETTING2)
+	else:
+		ProjectSettings.set_setting(PROJECT_SETTING2, PREVIEW_SIZE)
+	icon_generator.size = PREVIEW_SIZE
+	
+	plugin.project_settings_changed.connect(update_preview_size)
 	
 	for tab in data:
 		tabs.add_tab(tab.name)
@@ -58,6 +65,13 @@ func _ready() -> void:
 	
 	extras.hide()
 	%ParentSelector.set_drag_forwarding(Callable(), _can_drop_node, _drop_node)
+
+func update_preview_size():
+	if ProjectSettings.has_setting(PROJECT_SETTING2):
+		var new_preview_size: Vector2i = ProjectSettings.get_setting(PROJECT_SETTING2)
+		if new_preview_size != PREVIEW_SIZE:
+			PREVIEW_SIZE = new_preview_size
+			icon_generator.size = PREVIEW_SIZE
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_BEGIN:
