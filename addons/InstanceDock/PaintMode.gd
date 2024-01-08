@@ -4,8 +4,6 @@ extends Control
 @onready var plugin: EditorPlugin = owner.plugin
 
 @onready var status: Label = %Status
-@onready var parent_icon: TextureRect = %ParentIcon
-@onready var parent_name: LineEdit = %ParentName
 @onready var snap_enabled: CheckBox = %SnapEnabled
 @onready var snap_x: SpinBox = %SnapX
 @onready var snap_y: SpinBox = %SnapY
@@ -20,7 +18,6 @@ var edited_node: CanvasItem:
 		update_preview()
 		update_status()
 
-var default_parent: Node
 var preview: CanvasItem
 
 func _ready() -> void:
@@ -28,45 +25,8 @@ func _ready() -> void:
 		return
 	
 	hide()
-	%ParentSelector.set_drag_forwarding(Callable(), _can_drop_node, _drop_node)
 	
-	plugin.scene_changed.connect(on_scene_changed.unbind(1))
 	buttons.pressed.connect(on_button_pressed)
-
-func _can_drop_node(at: Vector2, data: Variant) -> bool:
-	if not data is Dictionary:
-		return false
-	
-	if not data.get("type", "") == "nodes":
-		return false
-	
-	if not "nodes" in data or not data["nodes"] is Array:
-		return false
-	
-	if data["nodes"].size() != 1 or not data["nodes"][0] is NodePath:
-		return false
-	
-	return true
-
-func _drop_node(at: Vector2, data: Variant):
-	var node: Node = get_tree().root.get_node_or_null(data["nodes"][0])
-	if not node:
-		return
-	
-	set_default_parent(node)
-
-func set_default_parent(node: Node):
-	if default_parent == node:
-		return
-	
-	default_parent = node
-	if node:
-		parent_icon.show()
-		parent_icon.texture = get_theme_icon(node.get_class(), &"EditorIcons")
-		parent_name.text = node.name
-	else:
-		parent_icon.hide()
-		parent_name.text = ""
 
 func set_paint_mode_enabled(toggled_on: bool) -> void:
 	var was_enabled := enabled
@@ -101,8 +61,6 @@ func on_button_pressed(button: BaseButton):
 func on_scene_changed():
 	if enabled:
 		update_preview()
-	
-	set_default_parent(null)
 
 func update_preview():
 	if not is_instance_valid(preview):
@@ -162,9 +120,9 @@ func paint_input(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
 		if event.pressed:
 			if event.button_index == MOUSE_BUTTON_LEFT:
-				var parent: Node = edited_node
-				if is_instance_valid(default_parent):
-					parent = default_parent
+				var parent: Node = owner.get_default_parent()
+				if not parent:
+					parent = edited_node
 				
 				var instance: CanvasItem = load(preview.scene_file_path).instantiate()
 				
@@ -196,7 +154,10 @@ func update_status():
 		return
 	elif not edited_node:
 		status.text = "(Re)Select any CanvasItem to start"
+		status.modulate = get_theme_color(&"warning_color", &"Editor")
 	elif selected_scene.is_empty():
 		status.text = "Click instance slot to select"
+		status.modulate = get_theme_color(&"warning_color", &"Editor")
 	else:
 		status.text = "Use LMB to paint instance"
+		status.modulate = Color.WHITE

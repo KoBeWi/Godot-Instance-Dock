@@ -113,7 +113,7 @@ func transparent_result(is_valid: bool):
 	loading_animator.stop()
 	
 	if not is_valid:
-		set_icon(preload("res://addons/InstanceDock/Missing.png"))
+		set_icon(preload("res://addons/InstanceDock/Textures/Missing.png"))
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 
 func _gui_input(event: InputEvent) -> void:

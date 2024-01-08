@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dp0lseq583t66"
-path="res://.godot/imported/Overrides.png-a508f028e13a6cfe23bacd7074be809b.ctex"
+uid="uid://b81f1abox2e67"
+path="res://.godot/imported/Uncollapse.svg-5ec2ceb0db44495dffad3987515c4f5a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/InstanceDock/Overrides.png"
-dest_files=["res://.godot/imported/Overrides.png-a508f028e13a6cfe23bacd7074be809b.ctex"]
+source_file="res://addons/InstanceDock/Textures/Uncollapse.svg"
+dest_files=["res://.godot/imported/Uncollapse.svg-5ec2ceb0db44495dffad3987515c4f5a.ctex"]
 
 [params]
 
@@ -32,3 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

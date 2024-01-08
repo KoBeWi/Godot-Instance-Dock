@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://qhbx85wqyv0v"
-path="res://.godot/imported/Missing.png-6eb631b48d5117a77344f3af5b10e836.ctex"
+uid="uid://dp0lseq583t66"
+path="res://.godot/imported/Overrides.png-090bd212cfc7269f12783dd04299318d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/InstanceDock/Missing.png"
-dest_files=["res://.godot/imported/Missing.png-6eb631b48d5117a77344f3af5b10e836.ctex"]
+source_file="res://addons/InstanceDock/Textures/Overrides.png"
+dest_files=["res://.godot/imported/Overrides.png-090bd212cfc7269f12783dd04299318d.ctex"]
 
 [params]
 

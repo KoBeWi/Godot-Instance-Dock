@@ -14,6 +14,10 @@ const PREVIEW_SIZE = Vector2i(64, 64)
 @onready var add_tab_label := %AddTabLabel
 @onready var drag_label := %DragLabel
 
+@onready var extras_toggle: Button = %ExtrasToggle
+@onready var extras: VBoxContainer = %Extras
+@onready var parent_icon: TextureRect = %ParentIcon
+@onready var parent_name: LineEdit = %ParentName
 @onready var paint_mode: VBoxContainer = %PaintMode
 
 @onready var icon_generator := $Viewport
@@ -28,6 +32,8 @@ var tab_to_remove := -1
 var icon_queue: Array[Dictionary]
 var icon_progress: int
 var current_processed_item: Dictionary
+
+var default_parent: Node
 
 var plugin: EditorPlugin
 
@@ -47,6 +53,11 @@ func _ready() -> void:
 	
 	for tab in data:
 		tabs.add_tab(tab.name)
+	
+	plugin.scene_changed.connect(on_scene_changed.unbind(1))
+	
+	extras.hide()
+	%ParentSelector.set_drag_forwarding(Callable(), _can_drop_node, _drop_node)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_BEGIN:
@@ -80,6 +91,22 @@ func node_added(node: Node):
 	var overrides: Dictionary = drag_data["instance_dock_overrides"]
 	for override in overrides:
 		node.set(override, overrides[override])
+	
+	var parent := get_default_parent()
+	
+	if parent and node.get_parent() != parent:
+		do_reparent.call_deferred(node, parent)
+
+func do_reparent(node: Node, to: Node):
+	var undo_redo := plugin.get_undo_redo()
+	undo_redo.create_action("InstanceDock reparent node")
+	undo_redo.add_do_method(node, &"reparent", to)
+	undo_redo.add_do_method(node, &"set_owner", node.owner)
+	undo_redo.add_do_method(node, &"set_name", node.name)
+	undo_redo.add_undo_method(node, &"reparent", node.get_parent())
+	undo_redo.add_undo_method(node, &"set_owner", node.owner)
+	undo_redo.add_undo_method(node, &"set_name", node.name)
+	undo_redo.commit_action()
 
 func on_add_tab_pressed() -> void:
 	tab_add_name.text = ""
@@ -276,3 +303,59 @@ func on_rearrange(idx_to: int) -> void:
 	data[idx_to] = old_data
 	previous_tab = idx_to
 	ProjectSettings.save()
+
+func toggle_extras() -> void:
+	extras.visible = not extras.visible
+	if extras.visible:
+		extras_toggle.icon = preload("res://addons/InstanceDock/Textures/Collapse.svg")
+	else:
+		extras_toggle.icon = preload("res://addons/InstanceDock/Textures/Uncollapse.svg")
+
+func set_default_parent(node: Node):
+	if default_parent == node and not (default_parent and not node):
+		return
+	
+	default_parent = node
+	if node:
+		parent_icon.show()
+		parent_icon.texture = get_theme_icon(node.get_class(), &"EditorIcons")
+		parent_name.text = node.name
+	else:
+		parent_icon.hide()
+		parent_name.text = ""
+
+func get_default_parent() -> Node:
+	var parent := default_parent
+	if is_instance_valid(parent):
+		if not parent.is_inside_tree():
+			set_default_parent(null)
+		else:
+			return parent
+	elif parent:
+		set_default_parent(null)
+	return null
+
+func on_scene_changed():
+	set_default_parent(null)
+
+func _can_drop_node(at: Vector2, data: Variant) -> bool:
+	if not data is Dictionary:
+		return false
+	
+	if not data.get("type", "") == "nodes":
+		return false
+	
+	if not "nodes" in data or not data["nodes"] is Array:
+		return false
+	
+	if data["nodes"].size() != 1 or not data["nodes"][0] is NodePath:
+		return false
+	
+	return true
+
+func _drop_node(at: Vector2, data: Variant):
+	var node: Node = get_tree().root.get_node_or_null(data["nodes"][0])
+	if not node:
+		return
+	
+	set_default_parent(node)

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rsllva5pmojk"
-path="res://.godot/imported/Loading.png-d25b0dd5364243f5b1926b8a20921879.ctex"
+uid="uid://qhbx85wqyv0v"
+path="res://.godot/imported/Missing.png-73f7ee024944670303562ca1ed55a502.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/InstanceDock/Loading.png"
-dest_files=["res://.godot/imported/Loading.png-d25b0dd5364243f5b1926b8a20921879.ctex"]
+source_file="res://addons/InstanceDock/Textures/Missing.png"
+dest_files=["res://.godot/imported/Missing.png-73f7ee024944670303562ca1ed55a502.ctex"]
 
 [params]
 
