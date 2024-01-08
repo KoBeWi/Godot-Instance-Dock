@@ -135,6 +135,9 @@ func remove_tab_confirm() -> void:
 	data.remove_at(tab_to_remove)
 	tabs.remove_tab(tab_to_remove)
 	ProjectSettings.save()
+	
+	if tabs.tab_count == 0:
+		refresh_tab_contents()
 
 func on_tab_changed(tab: int) -> void:
 	if tab_to_remove == -1 and data.size() > 0:
@@ -149,7 +152,7 @@ func refresh_tab_contents():
 	for c in slot_container.get_children():
 		c.free()
 	
-	if tabs.get_tab_count() == 0:
+	if tabs.tab_count == 0:
 		slot_container.hide()
 		add_tab_label.show()
 		drag_label.hide()
