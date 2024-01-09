@@ -106,10 +106,11 @@ func node_added(node: Node):
 	for override in overrides:
 		node.set(override, overrides[override])
 	
-	var parent := get_default_parent()
-	
-	if parent and node.get_parent() != parent:
-		do_reparent.call_deferred(node, parent)
+	if node.get_parent() == EditorInterface.get_edited_scene_root():
+		var parent := get_default_parent()
+		
+		if parent and node.get_parent() != parent:
+			do_reparent.call_deferred(node, parent)
 
 func do_reparent(node: Node, to: Node):
 	var undo_redo := plugin.get_undo_redo()
