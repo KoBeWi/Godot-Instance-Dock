@@ -3,53 +3,79 @@ Addon for Godot that adds a handy dock where you can store scenes.
 
 ![](Media/Screenshot1.png)
 
-## Cool stuff
+## Using scenes
 
-The scenes are organized into custom tabs. You can add a scene to the dock using drag and drop and then you can drag it onto your scene, as if dragging the scene file:
+The scenes are organized into custom tabs. You can add a scene to the dock using drag and drop and then you can drag it onto your scene, as if dragging the scene file.
 
-<img src="Media/ReadmeDragAndDrop.gif" width="450">
+<img src="Media/ReadmeDragAndDrop.gif" width="360">
 
-You can also assign using the Quick Load menu:
+You can also assign using the Quick Load option.
 
 <img src="Media/ReadmeQuickLoad.gif" width="450">
 
-You can use drag and drop within the dock too to rearrage the scenes. When you fill a row, a new row will appear automatically:
+Use drag and drop within the dock to rearrage the scenes. The dock will automatically add or remove empty slots.
 
 <img src="Media/ReadmeRow.gif" width="245">
 
-Every scene slot has a right-click menu:
+## Advanced options
+
+Every scene slot has a right-click menu.
 
 ![](Media/ReadmeMenu.png)
 
 - Open Scene: Opens the scene in editor.
-- Override Properties: Edits the instance in the inspector to allow changing its properties. This will not modify the original scene, instance dock keeps this data internally.
+- Override Properties: Edits the instance in the inspector to allow changing its properties.
 - Remove: Removes the scene from slot.
 - Refresh Icon: Forces the scene icon to refresh. The icons are cached, so if you edit a scene, you need to refresh the preview. Icon is refreshed automatically when changing overrides.
+- Quick Load: Opens a Quick Load menu to assign a scene.
 
-Instances with overrides have a green marker in the corner:
+### Property overrides
+
+You can override any property in the instance and the override is applied when you instance the scene. Instance dock keeps override data internally, so you can have multiple versions of the same scene. Instances with overrides have a green marker in the corner.
 
 ![](Media/ReadmeOverride.png)
 
-You can also assign a custom icon to the scene:
+### Icons
 
-<img src="Media/ReadmeCustom.gif" width="150">
+The icons are automatically generated from the scenes. The method for generation is basically: instantiate the scene inside viewport, move it to the center (if it's Node2D), take snapshot. The default icon resolution (viewport size) is 64x64. You can change it by modifying `addons/instance_dock/preview_resolution` project setting (it does not affect the slot size, which is always 64x64). If the icon turns out fully transparent, it will show a placeholder:
 
-The icons are generated from scenes. They only support 2D and aren't always 100% accurate, so this option is sometimes useful. Scenes with custom icons have a slight outline.
+![](Media/ReadmePlaceholder.png)
 
-## Technical stuff
+Since the icons only support 2D and aren't always 100% accurate, there is an option to assign a custom icon. Just drop any Texture2D onto a slot to assign icon.
 
-The scene list is stored inside your `project.godot` file. Whenever you modify it, your project settings are saved.
+<img src="Media/ReadmeCustom.gif" width="180">
 
-The plugin uses Viewport node to generate the scene icon. It just instances the scene inside viewport and saves the rendered texture. If the scene has Node2D root, it will be positioned at half of the preview size.
-The default preview size is 64x64. It can be changed in `InstanceDock.gd`. Keep in mind that this is only viewport size. The final texture is resized to the slot size (64x64).
+It supports any Texture2D type and scenes with custom icons have a faint outline. Use the context menu to remove the custom texture.
 
-A tab will load when first visible. Due to Viewports requiring a delay to update the texture, generating icons for many scenes takes a couple of seconds. A loading icon will be displayed while the preview is loading.
+The icons are created when the dock is opened for the first time. It may take some time, so a loading icon will appear.
 
-<img src="ReadmeLoading.gif" width="190">
+![](Media/ReadmeLoading.gif)
 
-If the rendered image comes fully transparent, a special icon will be displayed as placeholder.
+Afterwards the icons are cached inside `InstanceIconCache` subdirectory of your `.godot` folder, so they load faster. The cache can be invalidated by refreshing the icon manually from the context menu.
 
-After first load, the image will be cached in ".godot/InstanceIconCache" folder, so subsequent loads are much faster.
+## Painting mode
+
+This feature allows you to draw the scenes directly in the 2D viewport, without needing to drag and drop. It supports basic grid snapping and allows for faster placement of multiple instances.
+
+You can access it by unfolding the bottom subpanel and enabling Paint Mode.
+
+![](Media/ReadmeWherePaint.png)
+
+Due to engine limitations, you need to select a CanvasItem (Node2D or Control) in the scene tree to start painting. You can select scenes by clicking them (Paint Mode disables drag and drop) and then draw with left mouse button.
+
+![](Media/ReadmePaint.gif)
+
+When you enable Snap, the editor will display a basic grid near the cursor and the instance will be snapped to the grid.
+
+![](Media/ReadmeGrid.png)
+
+### Default parent
+
+When painting, the instances are by default created under the selected Node. You can change the default parent node by drag and dropping a node to the Parent field.
+
+![](Media/ReadmeDefaultParent.gif)
+
+When not using Paint Mode, the scenes from the dock have the same dragging behavior as scenes from FileSystem, i.e. the Node is added to scene root by default, hold Ctrl to add it as child of the selected node, hold Shift to add it as sibling of the selected node. If a default Parent is assigned and the node is added under the scene root, it automatically gets reparented to the selected parent.
 
 ___
 You can find all my addons on my [profile page](https://github.com/KoBeWi).
