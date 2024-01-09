@@ -17,6 +17,7 @@ var PREVIEW_SIZE = Vector2i(64, 64)
 
 @onready var extras_toggle: Button = %ExtrasToggle
 @onready var extras: VBoxContainer = %Extras
+@onready var parent_selector: HBoxContainer = %ParentSelector
 @onready var parent_icon: TextureRect = %ParentIcon
 @onready var parent_name: LineEdit = %ParentName
 @onready var paint_mode: VBoxContainer = %PaintMode
@@ -64,7 +65,7 @@ func _ready() -> void:
 	plugin.scene_changed.connect(on_scene_changed.unbind(1))
 	
 	extras.hide()
-	%ParentSelector.set_drag_forwarding(Callable(), _can_drop_node, _drop_node)
+	parent_selector.set_drag_forwarding(Callable(), _can_drop_node, _drop_node)
 
 func update_preview_size():
 	if ProjectSettings.has_setting(PROJECT_SETTING2):
@@ -338,9 +339,11 @@ func set_default_parent(node: Node):
 		parent_icon.show()
 		parent_icon.texture = get_theme_icon(node.get_class(), &"EditorIcons")
 		parent_name.text = node.name
+		parent_selector.tooltip_text = EditorInterface.get_edited_scene_root().get_path_to(node)
 	else:
 		parent_icon.hide()
 		parent_name.text = ""
+		parent_selector.tooltip_text = ""
 
 func get_default_parent() -> Node:
 	var parent := default_parent

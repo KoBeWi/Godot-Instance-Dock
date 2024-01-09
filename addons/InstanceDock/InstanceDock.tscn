@@ -98,6 +98,9 @@ mouse_filter = 2
 placeholder_text = "Drop Node to assign"
 editable = false
 
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/Extras"]
+layout_mode = 2
+
 [node name="CheckButton" type="CheckButton" parent="VBoxContainer/Extras"]
 layout_mode = 2
 size_flags_horizontal = 4

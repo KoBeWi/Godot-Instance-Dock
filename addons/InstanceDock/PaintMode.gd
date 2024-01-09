@@ -14,6 +14,8 @@ var buttons := ButtonGroup.new()
 var enabled: bool
 
 var selected_scene: String
+var overrides: Dictionary
+
 var edited_node: CanvasItem:
 	set(n):
 		edited_node = n
@@ -50,9 +52,12 @@ func set_paint_mode_enabled(toggled_on: bool) -> void:
 			preview = null
 	
 	update_status()
+	update_overlays()
 
 func on_button_pressed(button: BaseButton):
 	selected_scene = button.owner.scene
+	overrides = button.owner.overrides
+	
 	update_preview()
 	update_status()
 	
@@ -87,6 +92,8 @@ func update_preview():
 		else:
 			preview.name = &"_InstanceDock_Preview_"
 			RenderingServer.canvas_item_set_z_index(preview.get_canvas_item(), 4096)
+			for override in overrides:
+				preview.set(override, overrides[override])
 	
 	preview.visible = (edited_node != null)
 	
@@ -116,7 +123,7 @@ func paint_input(event: InputEvent) -> bool:
 		
 		if snap_enabled.button_pressed:
 			preview.global_position = target_pos.snapped(Vector2(snap_x.value, snap_y.value))
-			plugin.update_overlays()
+			update_overlays()
 		else:
 			preview.global_position = target_pos
 	
@@ -128,6 +135,8 @@ func paint_input(event: InputEvent) -> bool:
 					parent = edited_node
 				
 				var instance: CanvasItem = load(preview.scene_file_path).instantiate()
+				for override in overrides:
+					instance.set(override, overrides[override])
 				
 				var undo_redo := plugin.get_undo_redo()
 				undo_redo.create_action("InstanceDock paint node", UndoRedo.MERGE_DISABLE, parent)
@@ -146,7 +155,7 @@ func add_instance(parent: Node, own: Node, instance: CanvasItem, pos: Vector2):
 	instance.global_position = pos
 
 func paint_draw(viewport_control: Control):
-	if not snap_enabled.button_pressed or not edited_node:
+	if not enabled or not edited_node or not preview or not snap_enabled.button_pressed:
 		return
 	
 	for x in range(-GRID_SIZE / 2, GRID_SIZE / 2 + 1):
