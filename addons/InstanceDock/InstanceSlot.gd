@@ -56,11 +56,11 @@ func _can_drop_data(position: Vector2, data) -> bool:
 	if data.files.size() != 1:
 		return false
 	
-	return data.files[0].get_extension() == "tscn" or data.files[0].get_extension() == "png" and not scene.is_empty()
+	return data.files[0].get_extension() == "tscn" or is_texture(data.files[0]) and not scene.is_empty()
 
 func _drop_data(position: Vector2, data) -> void:
 	var file: String = data.files[0]
-	if file.get_extension() == "png" and not scene.is_empty():
+	if is_texture(file) and not scene.is_empty():
 		custom_texture = file
 		apply_data()
 		changed.emit()
@@ -75,6 +75,9 @@ func _drop_data(position: Vector2, data) -> void:
 			custom_texture = ""
 			apply_data()
 		changed.emit()
+
+func is_texture(file: String) -> bool:
+	return ClassDB.is_parent_class(EditorInterface.get_resource_filesystem().get_file_type(file), &"Texture2D")
 
 func _get_drag_data(position: Vector2):
 	if scene.is_empty():
