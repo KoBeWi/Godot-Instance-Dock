@@ -24,12 +24,20 @@ var edited_node: CanvasItem:
 
 var preview: CanvasItem
 
+var font: Font
+var help: bool
+var rotating: bool
+var scaling: bool
+
+var transform_from: Variant
+var transform_from_point: Vector2
+
 func _ready() -> void:
 	if not plugin:
 		return
 	
 	hide()
-	
+	font = EditorInterface.get_editor_theme().get_font(&"main", &"EditorFonts")
 	buttons.pressed.connect(on_button_pressed)
 
 func set_paint_mode_enabled(toggled_on: bool) -> void:
@@ -119,13 +127,20 @@ func paint_input(event: InputEvent) -> bool:
 		return false
 	
 	if event is InputEventMouseMotion:
-		var target_pos := edited_node.get_global_mouse_position()
-		
-		if snap_enabled.button_pressed:
-			preview.global_position = target_pos.snapped(Vector2(snap_x.value, snap_y.value))
+		if rotating:
+			preview.rotation = transform_from_point.direction_to(get_local_mouse_position()).angle()
+			update_overlays()
+		elif scaling:
+			preview.scale = (get_local_mouse_position() - transform_from_point) * 0.1
 			update_overlays()
 		else:
-			preview.global_position = target_pos
+			var target_pos := edited_node.get_global_mouse_position()
+			
+			if snap_enabled.button_pressed:
+				preview.global_position = target_pos.snapped(Vector2(snap_x.value, snap_y.value))
+				update_overlays()
+			else:
+				preview.global_position = target_pos
 	
 	if event is InputEventMouseButton:
 		if event.pressed:
@@ -141,21 +156,89 @@ func paint_input(event: InputEvent) -> bool:
 				var undo_redo := plugin.get_undo_redo()
 				undo_redo.create_action("InstanceDock paint node", UndoRedo.MERGE_DISABLE, parent)
 				undo_redo.add_do_reference(instance)
-				undo_redo.add_do_method(self, &"add_instance", parent, EditorInterface.get_edited_scene_root(), instance, preview.global_position)
+				undo_redo.add_do_method(self, &"add_instance", parent, EditorInterface.get_edited_scene_root(), instance, preview.get_global_transform())
 				undo_redo.add_undo_method(parent, &"remove_child", instance)
 				undo_redo.commit_action()
 				
 				return true
+			elif event.button_index == MOUSE_BUTTON_RIGHT:
+				if rotating:
+					preview.rotation = 0
+					rotating = false
+					update_overlays()
+					return true
+				elif scaling:
+					preview.scale = Vector2.ONE
+					scaling = false
+					update_overlays()
+					return true
+	
+	if event is InputEventKey:
+		if event.echo:
+			return false
+		
+		if event.pressed:
+			if event.keycode == KEY_H:
+				help = not help
+				update_overlays()
+				return true
+		
+		if event.keycode == KEY_R:
+			if scaling:
+				return false
+			
+			rotating = event.pressed
+			if rotating:
+				transform_from = preview.rotation
+				transform_from_point = get_local_mouse_position()
+			
+			update_overlays()
+			return true
+		
+		if event.keycode == KEY_S:
+			if rotating:
+				return false
+			
+			scaling = event.pressed
+			if scaling:
+				transform_from = preview.scale
+				transform_from_point = get_local_mouse_position()
+			
+			update_overlays()
+			return true
 	
 	return false
 
-func add_instance(parent: Node, own: Node, instance: CanvasItem, pos: Vector2):
+func add_instance(parent: Node, own: Node, instance: CanvasItem, trans: Transform2D):
 	parent.add_child(instance, true)
 	instance.owner = own
-	instance.global_position = pos
+	instance.global_position = trans.origin
+	instance.rotation = trans.get_rotation()
+	instance.scale = trans.get_scale()
 
 func paint_draw(viewport_control: Control):
-	if not enabled or not edited_node or not preview or not snap_enabled.button_pressed:
+	if not enabled or not edited_node or not preview:
+		return
+	
+	var font_pos_base := viewport_control.size * Vector2.DOWN + Vector2(40, -40)
+	if help:
+		viewport_control.draw_string(font, font_pos_base + Vector2.UP * 40, "Press H to toggle help")
+		
+		if rotating:
+			viewport_control.draw_string(font, font_pos_base + Vector2.UP * 20, "Rotating: %0.2f°" % rad_to_deg(preview.rotation))
+			viewport_control.draw_string(font, font_pos_base, "Press Right Mouse Button to reset")
+		elif not scaling:
+			viewport_control.draw_string(font, font_pos_base + Vector2.UP * 20, "Hold R to rotate")
+		
+		if scaling:
+			viewport_control.draw_string(font, font_pos_base + Vector2.UP * 20, "Scaling: %0.1f × %0.1f" % [preview.scale.x, preview.scale.y])
+			viewport_control.draw_string(font, font_pos_base, "Press Right Mouse Button to reset")
+		elif not rotating:
+			viewport_control.draw_string(font, font_pos_base, "Hold S to scale")
+	else:
+		viewport_control.draw_string(font, font_pos_base, "Press H to toggle help")
+	
+	if not snap_enabled.button_pressed:
 		return
 	
 	for x in range(-GRID_SIZE / 2, GRID_SIZE / 2 + 1):
