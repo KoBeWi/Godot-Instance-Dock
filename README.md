@@ -17,6 +17,10 @@ Use drag and drop within the dock to rearrage the scenes. The dock will automati
 
 <img src="Media/ReadmeRow.gif" width="245">
 
+### Scene data
+
+Scene data is saved in a designated file, which by default is `res://InstanceDockSceneData.txt`. You can change the data file by modifying `addons/instance_dock/scene_data_file` project setting (if the file exists, it will be automatically moved).
+
 ## Advanced options
 
 Every scene slot has a right-click menu.
