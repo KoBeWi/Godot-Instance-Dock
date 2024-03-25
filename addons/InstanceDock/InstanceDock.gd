@@ -1,9 +1,11 @@
 @tool
 extends Control
 
-const PROJECT_SETTING = "addons/instance_dock/scenes"
-const PROJECT_SETTING2 = "addons/instance_dock/preview_resolution"
+const PROJECT_SETTING_CONFIG = "addons/instance_dock/scene_data_file"
+const PROJECT_SETTING_LEGACY = "addons/instance_dock/scenes"
+const PROJECT_SETTING_PREVIEW = "addons/instance_dock/preview_resolution"
 var PREVIEW_SIZE = Vector2i(64, 64)
+var CONFIG_FILE = "res://InstanceDockSceneData.txt"
 
 @onready var tabs := %Tabs
 @onready var tab_add_confirm := %AddTabConfirm
@@ -46,18 +48,25 @@ func _ready() -> void:
 	if not plugin:
 		return
 	
-	if ProjectSettings.has_setting(PROJECT_SETTING):
-		data = ProjectSettings.get_setting(PROJECT_SETTING)
-	else:
-		ProjectSettings.set_setting(PROJECT_SETTING, data)
+	if ProjectSettings.has_setting(PROJECT_SETTING_LEGACY):
+		data = ProjectSettings.get_setting(PROJECT_SETTING_LEGACY)
+		ProjectSettings.set_setting(PROJECT_SETTING_LEGACY, null)
 	
-	if ProjectSettings.has_setting(PROJECT_SETTING2):
-		PREVIEW_SIZE = ProjectSettings.get_setting(PROJECT_SETTING2)
+	if ProjectSettings.has_setting(PROJECT_SETTING_CONFIG):
+		CONFIG_FILE = ProjectSettings.get_setting(PROJECT_SETTING_CONFIG)
+		load_data()
 	else:
-		ProjectSettings.set_setting(PROJECT_SETTING2, PREVIEW_SIZE)
+		ProjectSettings.set_setting(PROJECT_SETTING_CONFIG, CONFIG_FILE)
+		save_data()
+	ProjectSettings.add_property_info({ "name": PROJECT_SETTING_CONFIG, "type": TYPE_STRING, "hint": PROPERTY_HINT_SAVE_FILE })
+	
+	if ProjectSettings.has_setting(PROJECT_SETTING_PREVIEW):
+		PREVIEW_SIZE = ProjectSettings.get_setting(PROJECT_SETTING_PREVIEW)
+	else:
+		ProjectSettings.set_setting(PROJECT_SETTING_PREVIEW, PREVIEW_SIZE)
 	icon_generator.size = PREVIEW_SIZE
 	
-	plugin.project_settings_changed.connect(update_preview_size)
+	plugin.project_settings_changed.connect(update_settings)
 	
 	for tab in data:
 		tabs.add_tab(tab.name)
@@ -67,12 +76,40 @@ func _ready() -> void:
 	extras.hide()
 	parent_selector.set_drag_forwarding(Callable(), _can_drop_node, _drop_node)
 
-func update_preview_size():
-	if ProjectSettings.has_setting(PROJECT_SETTING2):
-		var new_preview_size: Vector2i = ProjectSettings.get_setting(PROJECT_SETTING2)
+func load_data():
+	var file := FileAccess.open(CONFIG_FILE, FileAccess.READ)
+	if not file:
+		push_error("Failed loading Instance Dock scene data. Error loading file: %d." % FileAccess.get_open_error())
+		return
+	
+	var loaded = str_to_var(file.get_as_text())
+	if not loaded is Array:
+		push_error("Failed loading Instance Dock scene data. File contains invalid data.")
+		return
+	
+	data = loaded
+
+func save_data():
+	var file := FileAccess.open(CONFIG_FILE, FileAccess.WRITE)
+	if not file:
+		push_error("Failed saving Instance Dock scene data. Error writing file: %d." % FileAccess.get_open_error())
+		return
+	
+	file.store_string(var_to_str(data))
+
+func update_settings():
+	if ProjectSettings.has_setting(PROJECT_SETTING_PREVIEW):
+		var new_preview_size: Vector2i = ProjectSettings.get_setting(PROJECT_SETTING_PREVIEW)
 		if new_preview_size != PREVIEW_SIZE:
 			PREVIEW_SIZE = new_preview_size
 			icon_generator.size = PREVIEW_SIZE
+	
+	if ProjectSettings.has_setting(PROJECT_SETTING_CONFIG):
+		var new_config_file: String = ProjectSettings.get_setting(PROJECT_SETTING_CONFIG)
+		if new_config_file != CONFIG_FILE:
+			if FileAccess.file_exists(CONFIG_FILE):
+				DirAccess.rename_absolute(CONFIG_FILE, new_config_file)
+			CONFIG_FILE = new_config_file
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_BEGIN:
@@ -136,7 +173,7 @@ func add_tab_confirm(q = null) -> void:
 	
 	tabs.add_tab(tab_add_name.text)
 	data.append({name = tab_add_name.text, scenes = [], scroll = 0})
-	ProjectSettings.save()
+	save_data()
 	
 	if data.size() == 1:
 		refresh_tab_contents()
@@ -150,7 +187,7 @@ func remove_tab_confirm() -> void:
 		tab_to_remove = -1
 	data.remove_at(tab_to_remove)
 	tabs.remove_tab(tab_to_remove)
-	ProjectSettings.save()
+	save_data()
 	
 	if tabs.tab_count == 0:
 		refresh_tab_contents()
@@ -307,7 +344,7 @@ func recreate_tab_data():
 	while not tab_scenes.is_empty() and tab_scenes.back().is_empty():
 		tab_scenes.pop_back()
 	
-	ProjectSettings.save()
+	save_data()
 	adjust_slot_count()
 
 func adjust_slot_count():
@@ -326,7 +363,7 @@ func on_rearrange(idx_to: int) -> void:
 	data[previous_tab] = data[idx_to]
 	data[idx_to] = old_data
 	previous_tab = idx_to
-	ProjectSettings.save()
+	save_data()
 
 func toggle_extras() -> void:
 	extras.visible = not extras.visible
