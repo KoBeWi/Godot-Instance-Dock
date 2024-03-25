@@ -162,6 +162,10 @@ func on_tab_changed(tab: int) -> void:
 	previous_tab = tab
 	
 	if initialized == 2:
+		icon_queue.clear()
+		current_processed_item = {}
+		set_process(false)
+		
 		refresh_tab_contents()
 
 func refresh_tab_contents():
@@ -189,6 +193,7 @@ func refresh_tab_contents():
 			else:
 				slot_container.get_child(i).set_data({})
 		
+		await get_tree().process_frame
 		scroll.scroll_vertical = tab_data.scroll
 	
 	if paint_mode.enabled:

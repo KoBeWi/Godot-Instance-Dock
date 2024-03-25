@@ -256,3 +256,8 @@ func get_hash() -> int:
 
 func setup_button(group: ButtonGroup):
 	paint_button.button_group = group
+
+func _exit_tree() -> void:
+	if thread:
+		thread.wait_to_finish()
+		thread = null
