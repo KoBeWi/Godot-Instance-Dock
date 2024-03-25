@@ -7,7 +7,7 @@ const PROJECT_SETTING_PREVIEW = "addons/instance_dock/preview_resolution"
 var PREVIEW_SIZE = Vector2i(64, 64)
 var CONFIG_FILE = "res://InstanceDockSceneData.txt"
 
-@onready var tabs := %Tabs
+@onready var tabs: TabBar = %Tabs
 @onready var tab_add_confirm := %AddTabConfirm
 @onready var tab_add_name := %AddTabName
 @onready var tab_delete_confirm := %DeleteConfirm
@@ -50,6 +50,8 @@ func _ready() -> void:
 	
 	if ProjectSettings.has_setting(PROJECT_SETTING_LEGACY):
 		data = ProjectSettings.get_setting(PROJECT_SETTING_LEGACY)
+		for tab in data:
+			tab.erase("scroll")
 		ProjectSettings.set_setting(PROJECT_SETTING_LEGACY, null)
 	
 	if ProjectSettings.has_setting(PROJECT_SETTING_CONFIG):
@@ -69,7 +71,7 @@ func _ready() -> void:
 	plugin.project_settings_changed.connect(update_settings)
 	
 	for tab in data:
-		tabs.add_tab(tab.name)
+		tabs.add_tab(tab["name"])
 	
 	plugin.scene_changed.connect(on_scene_changed.unbind(1))
 	
@@ -172,7 +174,7 @@ func add_tab_confirm(q = null) -> void:
 		tab_add_confirm.hide()
 	
 	tabs.add_tab(tab_add_name.text)
-	data.append({name = tab_add_name.text, scenes = [], scroll = 0})
+	data.append({ "name": tab_add_name.text, "scenes": [] })
 	save_data()
 	
 	if data.size() == 1:
@@ -194,7 +196,7 @@ func remove_tab_confirm() -> void:
 
 func on_tab_changed(tab: int) -> void:
 	if tab_to_remove == -1 and data.size() > 0:
-		data[previous_tab].scroll = scroll.scroll_vertical
+		tabs.set_tab_metadata(previous_tab, scroll.scroll_vertical)
 	tab_to_remove = -1
 	previous_tab = tab
 	
@@ -221,7 +223,7 @@ func refresh_tab_contents():
 	
 	if data.size() > 0:
 		var tab_data: Dictionary = data[tabs.current_tab]
-		var scenes: Array = tab_data.scenes
+		var scenes: Array = tab_data["scenes"]
 	
 		adjust_slot_count()
 		for i in slot_container.get_child_count():
@@ -230,14 +232,16 @@ func refresh_tab_contents():
 			else:
 				slot_container.get_child(i).set_data({})
 		
+		var scroll_value = tabs.get_tab_metadata(tabs.current_tab)
 		await get_tree().process_frame
-		scroll.scroll_vertical = tab_data.scroll
+		if scroll_value is int:
+			scroll.scroll_vertical = scroll_value
 	
 	if paint_mode.enabled:
 		paint_mode.set_paint_mode_enabled(true)
 
 func remove_scene(slot: int):
-	var tab_scenes: Array = data[tabs.current_tab].scenes
+	var tab_scenes: Array = data[tabs.current_tab]["scenes"]
 	tab_scenes[slot] = {}
 	while not tab_scenes.is_empty() and tab_scenes.back().is_empty():
 		tab_scenes.pop_back()
@@ -335,7 +339,7 @@ func add_slot() -> Control:
 	return slot
 
 func recreate_tab_data():
-	var tab_scenes: Array = data[tabs.current_tab].scenes
+	var tab_scenes: Array = data[tabs.current_tab]["scenes"]
 	tab_scenes.clear()
 	
 	for slot in slot_container.get_children():
@@ -349,7 +353,7 @@ func recreate_tab_data():
 
 func adjust_slot_count():
 	var tab_scenes: Array[Dictionary]
-	tab_scenes.assign(data[tabs.current_tab].scenes)
+	tab_scenes.assign(data[tabs.current_tab]["scenes"])
 	var desired_slots := tab_scenes.size() + 1
 	
 	while desired_slots > slot_container.get_child_count():
