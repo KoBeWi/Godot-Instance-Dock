@@ -60,12 +60,16 @@ func _ready() -> void:
 	else:
 		ProjectSettings.set_setting(PROJECT_SETTING_CONFIG, CONFIG_FILE)
 		save_data()
+	
+	ProjectSettings.set_initial_value(PROJECT_SETTING_CONFIG, CONFIG_FILE)
 	ProjectSettings.add_property_info({ "name": PROJECT_SETTING_CONFIG, "type": TYPE_STRING, "hint": PROPERTY_HINT_SAVE_FILE })
 	
 	if ProjectSettings.has_setting(PROJECT_SETTING_PREVIEW):
 		PREVIEW_SIZE = ProjectSettings.get_setting(PROJECT_SETTING_PREVIEW)
 	else:
 		ProjectSettings.set_setting(PROJECT_SETTING_PREVIEW, PREVIEW_SIZE)
+	
+	ProjectSettings.set_initial_value(PROJECT_SETTING_PREVIEW, PREVIEW_SIZE)
 	icon_generator.size = PREVIEW_SIZE
 	
 	plugin.project_settings_changed.connect(update_settings)
