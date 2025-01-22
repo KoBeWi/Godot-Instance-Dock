@@ -14,7 +14,7 @@ var buttons := ButtonGroup.new()
 var enabled: bool
 
 var selected_scene: String
-var overrides: Dictionary
+var overrides: Dictionary[StringName, Variant]
 
 var edited_node: CanvasItem:
 	set(n):
@@ -63,8 +63,11 @@ func set_paint_mode_enabled(toggled_on: bool) -> void:
 	update_overlays()
 
 func on_button_pressed(button: BaseButton):
-	selected_scene = button.owner.scene
-	overrides = button.owner.overrides
+	selected_scene = button.owner.get_scene()
+	if button.owner.data:
+		overrides = button.owner.data.overrides
+	else:
+		overrides = {}
 	
 	update_preview()
 	update_status()
@@ -153,8 +156,8 @@ func paint_input(event: InputEvent) -> bool:
 				for override in overrides:
 					instance.set(override, overrides[override])
 				
-				var undo_redo := plugin.get_undo_redo()
-				undo_redo.create_action("InstanceDock paint node", UndoRedo.MERGE_DISABLE, parent)
+				var undo_redo := EditorInterface.get_editor_undo_redo()
+				undo_redo.create_action("InstanceDock paint instance", UndoRedo.MERGE_DISABLE, parent)
 				undo_redo.add_do_reference(instance)
 				undo_redo.add_do_method(self, &"add_instance", parent, EditorInterface.get_edited_scene_root(), instance, preview.get_global_transform())
 				undo_redo.add_undo_method(parent, &"remove_child", instance)

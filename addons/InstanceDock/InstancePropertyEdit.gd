@@ -1,7 +1,7 @@
 extends RefCounted
 
 var instance: Node
-var overrides: Dictionary
+var overrides: Dictionary[StringName, Variant]
 
 signal changed
 
@@ -10,10 +10,10 @@ func _get_property_list() -> Array[Dictionary]:
 	var ret: Array[Dictionary]
 	
 	for property in properties:
-		if property.usage != PROPERTY_USAGE_DEFAULT and not property.usage & (PROPERTY_USAGE_GROUP | PROPERTY_USAGE_CATEGORY | PROPERTY_USAGE_SUBGROUP):
+		if property["usage"] != PROPERTY_USAGE_DEFAULT and not property["usage"] & (PROPERTY_USAGE_GROUP | PROPERTY_USAGE_CATEGORY | PROPERTY_USAGE_SUBGROUP):
 			continue
 		
-		if property.name == "position" or property.name == "script":
+		if property["name"] == "position" or property["name"] == "script":
 			continue
 		
 		ret.append(property)
@@ -36,10 +36,13 @@ func _set(property: StringName, value: Variant) -> bool:
 	return true
 
 func _property_can_revert(property: StringName) -> bool:
-	return overrides.has(property)
+	return true
 
 func _property_get_revert(property: StringName) -> Variant:
-	return instance.get(property)
+	if property == &"script":
+		return get_script()
+	else:
+		return instance.get(property)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:

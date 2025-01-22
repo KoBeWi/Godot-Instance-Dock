@@ -7,6 +7,93 @@ const PROJECT_SETTING_PREVIEW = "addons/instance_dock/preview_resolution"
 var PREVIEW_SIZE = Vector2i(64, 64)
 var CONFIG_FILE = "res://InstanceDockSceneData.txt"
 
+class Data:
+	class Instance:
+		var scene: String
+		var custom_texture: String
+		var overrides: Dictionary[StringName, Variant]
+	
+	class Tab:
+		var name: String
+		var instances: Array[Instance]
+	
+	var version: int
+	var tab_data: Array[Tab]
+	
+	func load_data(loaded):
+		var dict: Dictionary
+		if loaded is Dictionary:
+			dict = loaded
+		else:
+			dict = {"tab_data": loaded}
+		
+		version = dict.get("version", -1)
+		
+		for tab_dict: Dictionary in dict["tab_data"]:
+			var tab := Data.Tab.new()
+			tab_data.append(tab)
+			tab.name = tab_dict.get("name", "")
+			
+			for dict_instance: Dictionary in tab_dict.get("scenes", []):
+				var instance := Data.Instance.new()
+				tab.instances.append(instance)
+				
+				instance.scene = dict_instance.get("scene", "")
+				if version == -1:
+					var uid := ResourceLoader.get_resource_uid(instance.scene)
+					if uid != ResourceUID.INVALID_ID:
+						instance.scene = ResourceUID.id_to_text(uid)
+				
+				instance.custom_texture = dict_instance.get("custom_texture", "")
+				if version == -1:
+					var uid := ResourceLoader.get_resource_uid(instance.custom_texture)
+					if uid != ResourceUID.INVALID_ID:
+						instance.custom_texture = ResourceUID.id_to_text(uid)
+				
+				instance.overrides.assign(dict_instance.get("overrides", {}))
+		
+		version = 0
+	
+	func save_data() -> Dictionary:
+		var data: Dictionary
+		
+		data["version"] = version
+		
+		var save_tabs: Array
+		data["tab_data"] = save_tabs
+		
+		for tab in tab_data:
+			var tab_dict: Dictionary
+			save_tabs.append(tab_dict)
+			tab_dict["name"] = tab.name
+			
+			var instances: Array
+			for instance in tab.instances:
+				var instance_dict: Dictionary
+				instances.append(instance_dict)
+				
+				if instance:
+					instance_dict["scene"] = instance.scene
+					if not instance.custom_texture.is_empty():
+						instance_dict["custom_texture"] = instance.custom_texture
+					if not instance.overrides.is_empty():
+						var untyped: Dictionary
+						untyped.assign(instance.overrides)
+						instance_dict["overrides"] = untyped
+				
+				if not instances.is_empty():
+					tab_dict["scenes"] = instances
+		
+		return data
+
+class ProcessedItem:
+	var icon_path: String
+	var icon: Texture2D
+	var instance_path: String
+	var instance: Node
+	var slot: Control
+	var overrides: Dictionary[StringName, Variant]
+
 @onready var tabs: TabBar = %Tabs
 @onready var tab_add_confirm := %AddTabConfirm
 @onready var tab_add_name := %AddTabName
@@ -26,16 +113,16 @@ var CONFIG_FILE = "res://InstanceDockSceneData.txt"
 
 @onready var icon_generator := $Viewport
 
-var data: Array
+var data: Data
 var initialized: int
 
 var icon_cache: Dictionary
 var previous_tab: int
 
 var tab_to_remove := -1
-var icon_queue: Array[Dictionary]
+var icon_queue: Array[ProcessedItem]
 var icon_progress: int
-var current_processed_item: Dictionary
+var current_processed_item: ProcessedItem
 
 var default_parent: Node
 
@@ -45,7 +132,7 @@ func _ready() -> void:
 	set_process(false)
 	DirAccess.make_dir_recursive_absolute(".godot/InstanceIconCache")
 	
-	if not plugin:
+	if is_part_of_edited_scene():
 		return
 	
 	if ProjectSettings.has_setting(PROJECT_SETTING_LEGACY):
@@ -74,8 +161,8 @@ func _ready() -> void:
 	
 	plugin.project_settings_changed.connect(update_settings)
 	
-	for tab in data:
-		tabs.add_tab(tab["name"])
+	for tab in data.tab_data:
+		tabs.add_tab(tab.name)
 	
 	plugin.scene_changed.connect(on_scene_changed.unbind(1))
 	
@@ -83,17 +170,19 @@ func _ready() -> void:
 	parent_selector.set_drag_forwarding(Callable(), _can_drop_node, _drop_node)
 
 func load_data():
+	data = Data.new()
+	
 	var file := FileAccess.open(CONFIG_FILE, FileAccess.READ)
 	if not file:
 		push_error("Failed loading Instance Dock scene data. Error loading file: %d." % FileAccess.get_open_error())
 		return
 	
 	var loaded = str_to_var(file.get_as_text())
-	if not loaded is Array:
+	if not loaded is Array and not loaded is Dictionary: # compat
 		push_error("Failed loading Instance Dock scene data. File contains invalid data.")
 		return
 	
-	data = loaded
+	data.load_data(loaded)
 
 func save_data():
 	var file := FileAccess.open(CONFIG_FILE, FileAccess.WRITE)
@@ -101,7 +190,7 @@ func save_data():
 		push_error("Failed saving Instance Dock scene data. Error writing file: %d." % FileAccess.get_open_error())
 		return
 	
-	file.store_string(var_to_str(data))
+	file.store_string(var_to_str(data.save_data()))
 
 func update_settings():
 	if ProjectSettings.has_setting(PROJECT_SETTING_PREVIEW):
@@ -199,14 +288,14 @@ func remove_tab_confirm() -> void:
 		refresh_tab_contents()
 
 func on_tab_changed(tab: int) -> void:
-	if tab_to_remove == -1 and data.size() > 0:
+	if tab_to_remove == -1 and data.tab_data.size() > 0:
 		tabs.set_tab_metadata(previous_tab, scroll.scroll_vertical)
 	tab_to_remove = -1
 	previous_tab = tab
 	
 	if initialized == 2:
 		icon_queue.clear()
-		current_processed_item = {}
+		current_processed_item = null
 		set_process(false)
 		
 		refresh_tab_contents()
@@ -225,16 +314,16 @@ func refresh_tab_contents():
 		add_tab_label.hide()
 		drag_label.show()
 	
-	if data.size() > 0:
-		var tab_data: Dictionary = data[tabs.current_tab]
-		var scenes: Array = tab_data["scenes"]
-	
+	if data.tab_data.size() > 0:
+		var tab_data := data.tab_data[tabs.current_tab]
+		var scenes := tab_data.instances
+		
 		adjust_slot_count()
 		for i in slot_container.get_child_count():
-			if i < scenes.size() and not scenes[i].is_empty():
+			if i < scenes.size():
 				slot_container.get_child(i).set_data(scenes[i])
 			else:
-				slot_container.get_child(i).set_data({})
+				slot_container.get_child(i).set_data(Data.Instance.new())
 		
 		var scroll_value = tabs.get_tab_metadata(tabs.current_tab)
 		await get_tree().process_frame
@@ -245,30 +334,28 @@ func refresh_tab_contents():
 		paint_mode.set_paint_mode_enabled(true)
 
 func remove_scene(slot: int):
-	var tab_scenes: Array = data[tabs.current_tab]["scenes"]
-	tab_scenes[slot] = {}
+	var tab_scenes := data.tab_data[tabs.current_tab].instances
+	tab_scenes[slot] = Data.Instance.new()
 	while not tab_scenes.is_empty() and tab_scenes.back().is_empty():
 		tab_scenes.pop_back()
 
 func _process(delta: float) -> void:
-	if icon_queue.is_empty() and current_processed_item.is_empty():
+	if icon_queue.is_empty() and not current_processed_item:
 		set_process(false)
 		return
 	
-	if current_processed_item.is_empty():
+	if not current_processed_item:
 		get_item_from_queue()
 	
-	var slot = current_processed_item.slot
-	
-	if "png" in current_processed_item:
-		icon_cache[slot.get_hash()] = current_processed_item.png
-		slot.set_icon(current_processed_item.png)
+	var slot := current_processed_item.slot
+	if current_processed_item.icon:
+		icon_cache[slot.get_hash()] = current_processed_item.icon
+		slot.set_icon(current_processed_item.icon)
 		get_item_from_queue()
 		return
 	
-	var instance: Node = current_processed_item.instance
-	
-	var overrides: Dictionary = current_processed_item.overrides
+	var instance := current_processed_item.instance
+	var overrides := current_processed_item.overrides
 	for override in overrides:
 		instance.set(override, overrides[override])
 	
@@ -277,7 +364,7 @@ func _process(delta: float) -> void:
 		instance.free()
 		get_item_from_queue()
 		
-		if current_processed_item.is_empty():
+		if not current_processed_item:
 			return
 		else:
 			instance = current_processed_item.instance
@@ -303,16 +390,16 @@ func _process(delta: float) -> void:
 
 func get_item_from_queue():
 	if icon_queue.is_empty():
-		current_processed_item = {}
+		current_processed_item = null
 		return
 	
 	current_processed_item = icon_queue.pop_front()
-	if "png" in current_processed_item:
-		var texture := ImageTexture.create_from_image(Image.load_from_file(current_processed_item.png))
-		current_processed_item.png = texture
+	if not current_processed_item.icon_path.is_empty():
+		var texture := ImageTexture.create_from_image(Image.load_from_file(current_processed_item.icon_path))
+		current_processed_item.icon = texture
 	else:
-		current_processed_item.instance = load(current_processed_item.scene).instantiate()
-		current_processed_item.overrides = current_processed_item.slot.overrides
+		current_processed_item.instance = load(current_processed_item.instance_path).instantiate()
+		current_processed_item.overrides = current_processed_item.slot.data.overrides
 
 func assign_icon(scene_path: String, ignore_cache: bool, slot: Control):
 	if not ignore_cache:
@@ -324,18 +411,23 @@ func assign_icon(scene_path: String, ignore_cache: bool, slot: Control):
 		else:
 			var cache_path := ".godot/InstanceIconCache/%s.png" % hash
 			if FileAccess.file_exists(cache_path):
-				icon_queue.append({ png = cache_path, slot = slot })
+				var queued := ProcessedItem.new()
+				queued.icon_path = cache_path
+				queued.slot = slot
+				icon_queue.append(queued)
 				set_process(true)
 				return
 	generate_icon(scene_path, slot)
 
 func generate_icon(scene_path: String, slot: Control):
-	icon_queue.append({scene = scene_path, slot = slot})
+	var queued := ProcessedItem.new()
+	queued.instance_path = scene_path
+	queued.slot = slot
+	icon_queue.append(queued)
 	set_process(true)
 
 func add_slot() -> Control:
 	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instantiate()
-	slot.plugin = plugin
 	slot_container.add_child(slot)
 	slot.setup_button(paint_mode.buttons)
 	slot.request_icon.connect(assign_icon.bind(slot))
@@ -343,21 +435,20 @@ func add_slot() -> Control:
 	return slot
 
 func recreate_tab_data():
-	var tab_scenes: Array = data[tabs.current_tab]["scenes"]
+	var tab_scenes := data.tab_data[tabs.current_tab].instances
 	tab_scenes.clear()
 	
 	for slot in slot_container.get_children():
 		tab_scenes.append(slot.get_data())
 	
-	while not tab_scenes.is_empty() and tab_scenes.back().is_empty():
+	while not tab_scenes.is_empty() and (not tab_scenes.back() or tab_scenes.back().scene.is_empty()):
 		tab_scenes.pop_back()
 	
 	save_data()
 	adjust_slot_count()
 
 func adjust_slot_count():
-	var tab_scenes: Array[Dictionary]
-	tab_scenes.assign(data[tabs.current_tab]["scenes"])
+	var tab_scenes := data.tab_data[tabs.current_tab].instances
 	var desired_slots := tab_scenes.size() + 1
 	
 	while desired_slots > slot_container.get_child_count():
@@ -367,9 +458,9 @@ func adjust_slot_count():
 		slot_container.get_child(slot_container.get_child_count() - 1).free()
 
 func on_rearrange(idx_to: int) -> void:
-	var old_data: Dictionary = data[previous_tab]
-	data[previous_tab] = data[idx_to]
-	data[idx_to] = old_data
+	var old_data := data.tab_data[previous_tab]
+	data.tab_data[previous_tab] = data.tab_data[idx_to]
+	data.tab_data[idx_to] = old_data
 	previous_tab = idx_to
 	save_data()
 

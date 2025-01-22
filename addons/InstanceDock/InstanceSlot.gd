@@ -2,6 +2,7 @@
 extends PanelContainer
 
 const InstanceDockPropertyEdit = preload("res://addons/InstanceDock/InstancePropertyEdit.gd")
+const InstanceDock = preload("res://addons/InstanceDock/InstanceDock.gd")
 
 enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
 
@@ -16,13 +17,8 @@ enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
 @onready var text_label: Label = %Label
 @onready var paint_button: Button = $PaintButton
 
+var data: InstanceDock.Data.Instance
 var popup: PopupMenu
-var resource_picker: EditorResourcePicker
-
-var plugin: EditorPlugin
-var scene: String
-var overrides: Dictionary
-var custom_texture: String
 var thread: Thread
 
 signal request_icon(instance, ignore_cache)
@@ -30,15 +26,6 @@ signal changed
 
 func _ready() -> void:
 	set_process(false)
-	
-	resource_picker = EditorResourcePicker.new()
-	add_child(resource_picker)
-	resource_picker.hide()
-	resource_picker.base_type = "PackedScene"
-	resource_picker.resource_changed.connect(func(res: Resource):
-		set_data({scene = res.resource_path})
-		changed.emit()
-	)
 
 func _process(delta: float) -> void:
 	if not thread.is_alive():
@@ -46,44 +33,47 @@ func _process(delta: float) -> void:
 		thread = null
 		set_process(false)
 
-func _can_drop_data(position: Vector2, data) -> bool:
-	if not data is Dictionary or not "type" in data:
+func _can_drop_data(at_position: Vector2, drop_data) -> bool:
+	if not drop_data is Dictionary or drop_data.get("type", "") != "files":
 		return false
 	
-	if data.type != "files":
+	if not "files" in drop_data or drop_data["files"].size() != 1:
 		return false
 	
-	if data.files.size() != 1:
-		return false
+	if drop_data["files"][0].get_extension() == "tscn" or drop_data["files"][0].get_extension() == "res":
+		return true
 	
-	return data.files[0].get_extension() == "tscn" or is_texture(data.files[0]) and not scene.is_empty()
+	if is_texture(drop_data["files"][0]) and is_valid():
+		return true
+	
+	return false
 
-func _drop_data(position: Vector2, data) -> void:
-	var file: String = data.files[0]
-	if is_texture(file) and not scene.is_empty():
-		custom_texture = file
+func _drop_data(at_position: Vector2, drop_data) -> void:
+	var file: String = drop_data["files"][0]
+	if is_texture(file) and is_valid():
+		data.custom_texture = file
 		apply_data()
 		changed.emit()
 	elif file.get_extension() == "tscn":
-		if "from_slot" in data:
-			var slot2: Control = get_parent().get_child(data.from_slot)
-			var data2: Dictionary = slot2.get_data()
-			slot2.set_data(get_data())
+		if "from_slot" in drop_data:
+			var slot2: Control = get_parent().get_child(drop_data["from_slot"])
+			if slot2 == self:
+				return
+			
+			var data2: InstanceDock.Data.Instance = slot2.data
+			slot2.set_data(data)
 			set_data(data2)
 		else:
-			scene = file
-			custom_texture = ""
-			apply_data()
+			set_scene(file)
 		changed.emit()
 
 func is_texture(file: String) -> bool:
 	return ClassDB.is_parent_class(EditorInterface.get_resource_filesystem().get_file_type(file), &"Texture2D")
 
 func _get_drag_data(position: Vector2):
-	if scene.is_empty():
+	if not is_valid():
 		return null
-	
-	return { files = [scene], type = "files", from_slot = get_index(), instance_dock_overrides = overrides }
+	return {"files": [get_scene()], "type": "files", "from_slot": get_index(), "instance_dock_overrides": data.overrides }
 
 func set_icon(texture: Texture2D):
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -125,7 +115,7 @@ func _gui_input(event: InputEvent) -> void:
 			create_popup()
 			popup.popup()
 			popup.position = get_screen_transform() * event.position
-		elif event.double_click and event.button_index == MOUSE_BUTTON_LEFT and not scene.is_empty():
+		elif event.double_click and event.button_index == MOUSE_BUTTON_LEFT and is_valid():
 			menu_option(MenuOption.EDIT)
 
 func create_popup():
@@ -136,11 +126,11 @@ func create_popup():
 	
 	popup.clear()
 	
-	if not scene.is_empty():
+	if is_valid():
 		popup.add_item("Open Scene", MenuOption.EDIT)
 		popup.add_item("Override Properties", MenuOption.MODIFY)
 		popup.add_item("Remove", MenuOption.REMOVE)
-		if custom_texture:
+		if data.custom_texture:
 			popup.add_item("Remove Custom Icon", MenuOption.CLEAR)
 		else:
 			popup.add_item("Refresh Icon", MenuOption.REFRESH)
@@ -152,64 +142,49 @@ func create_popup():
 func menu_option(id: int) -> void:
 	match id:
 		MenuOption.EDIT:
-			plugin.get_editor_interface().open_scene_from_path(scene)
+			EditorInterface.open_scene_from_path(data.scene)
 		MenuOption.MODIFY:
 			var editor := InstanceDockPropertyEdit.new()
-			editor.instance = load(scene).instantiate()
-			editor.overrides = overrides
-			plugin.get_editor_interface().inspect_object(editor, "", true)
+			editor.instance = load(data.scene).instantiate()
+			editor.overrides = data.overrides
+			EditorInterface.inspect_object(editor, "", true)
 			editor.changed.connect(timer.start)
 		MenuOption.REMOVE:
-			scene = ""
-			custom_texture = ""
-			overrides.clear()
-			if plugin.get_editor_interface().get_inspector().get_edited_object() is InstanceDockPropertyEdit:
-				plugin.get_editor_interface().edit_node(null)
+			data = null
 			
-			changed.emit()
+			if EditorInterface.get_inspector().get_edited_object() is InstanceDockPropertyEdit:
+				EditorInterface.edit_node(null)
+			
 			apply_data()
+			changed.emit()
 		MenuOption.REFRESH:
 			start_load()
-			request_icon.emit(scene, true)
+			request_icon.emit(data.scene, true)
 		MenuOption.CLEAR:
-			custom_texture = ""
-			changed.emit()
+			data.custom_texture = ""
 			apply_data()
+			changed.emit()
 		MenuOption.QUICK_LOAD:
-			var popup: Popup
-			
-			if resource_picker.get_child_count() < 3:
-				var fake_click := InputEventMouseButton.new()
-				fake_click.pressed = true
-				fake_click.button_index = MOUSE_BUTTON_RIGHT
-				
-				var edit_button: Button = resource_picker.get_child(1)
-				edit_button.gui_input.emit(fake_click)
-				
-				popup = resource_picker.get_child(2)
-				popup.hide()
-			else:
-				popup = resource_picker.get_child(2)
-			
-			popup.id_pressed.emit(1)
+			EditorInterface.popup_quick_open(func(scene: String):
+				if not scene.is_empty():
+					set_scene(scene)
+					changed.emit()
+				, ["PackedScene"])
 
-func get_data() -> Dictionary:
-	if scene.is_empty():
-		return {}
-	
-	var data := { scene = scene }
-	if not custom_texture.is_empty():
-		data.custom_texture = custom_texture
-	
-	if not overrides.is_empty():
-		data.overrides = overrides
-	
+func get_data() -> InstanceDock.Data.Instance:
 	return data
 
-func set_data(data: Dictionary):
-	scene = data.get("scene", "")
-	custom_texture = data.get("custom_texture", "")
-	overrides = data.get("overrides", {})
+func set_scene(scene: String):
+	var uid := ResourceLoader.get_resource_uid(scene)
+	if uid != ResourceUID.INVALID_ID:
+		scene = ResourceUID.id_to_text(uid)
+	
+	data = InstanceDock.Data.Instance.new()
+	data.scene = scene
+	apply_data()
+
+func set_data(p_data: InstanceDock.Data.Instance):
+	data = p_data
 	apply_data()
 
 func set_text_label(vis : bool):
@@ -217,42 +192,57 @@ func set_text_label(vis : bool):
 
 func apply_data():
 	var text: PackedStringArray
-	text.append(scene.get_file())
-	if not overrides.is_empty():
+	text.append(get_scene().get_file())
+	
+	if data and not data.overrides.is_empty():
 		text.append("\nOverrides:")
-		for override in overrides:
-			text.append("%s: %s" % [override, overrides[override]])
+		for override in data.overrides:
+			text.append("%s: %s" % [override, data.overrides[override]])
 	tooltip_text = "\n".join(text)
 	
 	set_icon(null)
 	set_text_label(false)
 	add_theme_stylebox_override(&"panel", normal)
 	
-	if scene.is_empty():
+	if not is_valid():
 		set_icon(null)
 		set_text_label(true)
-	elif custom_texture.is_empty():
+	elif data.custom_texture.is_empty():
 		start_load()
-		request_icon.emit(scene, false)
+		request_icon.emit(data.scene, false)
 	else:
-		set_icon(load(custom_texture))
+		set_icon(load(data.custom_texture))
 		add_theme_stylebox_override(&"panel", custom)
 	
-	paint_button.disabled = scene.is_empty()
-	
-	has_overrides.visible = not overrides.is_empty()
+	paint_button.disabled = not is_valid()
+	has_overrides.visible = data != null and not data.overrides.is_empty()
 
 func start_load():
 	loading_animator.play(&"Rotate")
 	loading_icon.show()
 
 func _on_timer_timeout() -> void:
-	has_overrides.visible = not overrides.is_empty()
+	has_overrides.visible = not data.overrides.is_empty()
 	apply_data()
 	menu_option(MenuOption.REFRESH)
 
+func get_scene() -> String:
+	if not data:
+		return ""
+	
+	var path := data.scene
+	if path.begins_with("uid://"):
+		path = ResourceUID.get_id_path(ResourceUID.text_to_id(path))
+	
+	return path
+
+func is_valid() -> bool:
+	return data != null and not data.scene.is_empty()
+
 func get_hash() -> int:
-	return str(scene, overrides).hash()
+	if not data:
+		return 0
+	return str(data.scene, data.overrides).hash()
 
 func setup_button(group: ButtonGroup):
 	paint_button.button_group = group
