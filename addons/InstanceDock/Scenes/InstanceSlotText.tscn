@@ -1,8 +1,8 @@
-[gd_scene load_steps=14 format=3 uid="uid://ba54n4w4qb18j"]
+[gd_scene load_steps=14 format=3 uid="uid://cud5aqeotr1y0"]
 
-[ext_resource type="Script" uid="uid://cffy8p6erriue" path="res://addons/InstanceDock/InstanceSlot.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://dp0lseq583t66" path="res://addons/InstanceDock/Textures/Overrides.png" id="2_t8bng"]
-[ext_resource type="Texture2D" uid="uid://rsllva5pmojk" path="res://addons/InstanceDock/Textures/Loading.png" id="3_2l1qq"]
+[ext_resource type="Script" uid="uid://cffy8p6erriue" path="res://addons/InstanceDock/Scripts/InstanceSlot.gd" id="1_hrh6k"]
+[ext_resource type="Texture2D" uid="uid://dp0lseq583t66" path="res://addons/InstanceDock/Textures/Overrides.png" id="2_24cxw"]
+[ext_resource type="Texture2D" uid="uid://rsllva5pmojk" path="res://addons/InstanceDock/Textures/Loading.png" id="3_3qp7n"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 content_margin_left = 2.0
@@ -26,28 +26,6 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1u6qi"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hom1a"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_au8j5"]
-draw_center = false
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.431373, 0, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s7yid"]
-draw_center = false
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0, 0, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_khpyj"]
 
 [sub_resource type="Animation" id="2"]
 length = 0.001
@@ -86,45 +64,83 @@ _data = {
 &"Rotate": SubResource("3")
 }
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1u6qi"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hom1a"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_au8j5"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.431373, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s7yid"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0, 0, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_khpyj"]
+
 [node name="InstanceSlot" type="PanelContainer"]
-offset_right = 64.0
-offset_bottom = 64.0
+offset_right = 144.0
+offset_bottom = 21.0
 theme_override_styles/panel = SubResource("1")
-script = ExtResource("1")
+script = ExtResource("1_hrh6k")
 normal = SubResource("1")
 custom = SubResource("4")
 
-[node name="Icon" type="TextureRect" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="HBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(64, 64)
+custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 1
 
-[node name="Label" type="Label" parent="Icon"]
+[node name="Loading" type="Sprite2D" parent="HBoxContainer/Icon"]
+unique_name_in_owner = true
+visible = false
+position = Vector2(8, 8)
+texture = ExtResource("3_3qp7n")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HBoxContainer/Icon/Loading"]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_u8ud1")
+}
+
+[node name="Label" type="Label" parent="HBoxContainer"]
 unique_name_in_owner = true
 z_as_relative = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 mouse_filter = 1
 theme_override_constants/line_spacing = 0
 theme_override_font_sizes/font_size = 12
 text = "Drop scene to assign"
 horizontal_alignment = 1
 vertical_alignment = 1
-autowrap_mode = 2
+
+[node name="Path" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text_overrun_behavior = 3
 
 [node name="HasOverrides" type="TextureRect" parent="."]
 visible = false
 texture_filter = 1
 layout_mode = 2
-size_flags_horizontal = 8
+size_flags_horizontal = 0
 size_flags_vertical = 8
-texture = ExtResource("2_t8bng")
+texture = ExtResource("2_24cxw")
 stretch_mode = 2
 
 [node name="PaintButton" type="Button" parent="."]
@@ -137,18 +153,6 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_au8j5")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_s7yid")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_khpyj")
 toggle_mode = true
-
-[node name="Loading" type="Sprite2D" parent="."]
-unique_name_in_owner = true
-visible = false
-position = Vector2(32, 32)
-texture = ExtResource("3_2l1qq")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Loading"]
-unique_name_in_owner = true
-libraries = {
-&"": SubResource("AnimationLibrary_u8ud1")
-}
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.5

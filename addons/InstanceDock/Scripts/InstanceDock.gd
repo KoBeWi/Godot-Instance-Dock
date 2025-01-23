@@ -269,7 +269,7 @@ func do_reparent(node: Node, to: Node):
 	undo_redo.commit_action()
 
 func on_add_tab_pressed() -> void:
-	tab_add_name.text = ""
+	tab_add_name.text = "" # NO_TRANSLATE
 	tab_add_confirm.reset_size()
 	tab_add_confirm.popup_centered()
 	tab_add_name.grab_focus.call_deferred()
@@ -503,8 +503,8 @@ func set_default_parent(node: Node):
 		parent_selector.tooltip_text = EditorInterface.get_edited_scene_root().get_path_to(node)
 	else:
 		parent_icon.hide()
-		parent_name.text = ""
-		parent_selector.tooltip_text = ""
+		parent_name.text = "" # NO_TRANSLATE
+		parent_selector.tooltip_text = "" # NO_TRANSLATE
 
 func get_default_parent() -> Node:
 	var parent := default_parent
@@ -528,10 +528,10 @@ func set_slot_mode(new_slot_mode: int):
 	current_slot_mode = new_slot_mode
 	if current_slot_mode == SLOT_MODE_TEXT:
 		slot_container = %TextSlots
-		slot_scene = preload("res://addons/InstanceDock/InstanceSlotText.tscn")
+		slot_scene = preload("res://addons/InstanceDock/Scenes/InstanceSlotText.tscn")
 	else:
 		slot_container = %IconSlots
-		slot_scene = preload("res://addons/InstanceDock/InstanceSlot.tscn")
+		slot_scene = preload("res://addons/InstanceDock/Scenes/InstanceSlot.tscn")
 	
 	refresh_tab_contents()
 

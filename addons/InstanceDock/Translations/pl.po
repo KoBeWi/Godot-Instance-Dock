@@ -1,0 +1,121 @@
+# LANGUAGE translation for  for the following files:
+# res://addons/InstanceDock/Scenes/InstanceDock.tscn
+# res://addons/InstanceDock/Scenes/InstanceSlot.tscn
+# res://addons/InstanceDock/Scenes/InstanceSlotText.tscn
+# res://addons/InstanceDock/Scripts/InstanceDock.gd
+# res://addons/InstanceDock/Scripts/InstancePropertyEdit.gd
+# res://addons/InstanceDock/Scripts/InstanceSlot.gd
+# res://addons/InstanceDock/Scripts/PaintMode.gd
+# res://addons/InstanceDock/InstanceDockPlugin.gd
+#
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+#: addons/InstanceDock/Scenes/InstanceDock.tscn
+msgid "Filter Instances"
+msgstr "Filtruj instancje"
+
+#: addons/InstanceDock/Scenes/InstanceDock.tscn
+msgid "Add tab to continue."
+msgstr "Dodaj kartę, by kontynuować."
+
+#: addons/InstanceDock/Scenes/InstanceDock.tscn
+msgid ""
+"Drag scene from file system on a slot to assign or right-click to Quick Load."
+msgstr ""
+"Przeciągnij scenę z Systemu plików na slot lub kliknij prawym, by szybko "
+"wczytać."
+
+#: addons/InstanceDock/Scenes/InstanceDock.tscn
+msgid "Parent"
+msgstr "Rodzic"
+
+#: addons/InstanceDock/Scenes/InstanceDock.tscn
+msgid "Drop Node to assign"
+msgstr "Upuść węzeł, by przypisać"
+
+#: addons/InstanceDock/Scenes/InstanceDock.tscn
+msgid "Paint Mode"
+msgstr "Tryb malowania"
+
+#: addons/InstanceDock/Scenes/InstanceDock.tscn
+msgid "Snap"
+msgstr "Przyciąganie"
+
+#: addons/InstanceDock/Scenes/InstanceDock.tscn
+msgid "This will permanently remove the tab. Continue?"
+msgstr "Karta zostanie bezpowrotnie usunięta. Kontynuować?"
+
+#: addons/InstanceDock/Scenes/InstanceDock.tscn
+msgid "Tab name"
+msgstr "Nazwa karty"
+
+#: addons/InstanceDock/Scenes/InstanceSlot.tscn
+#: addons/InstanceDock/Scenes/InstanceSlotText.tscn
+msgid "Drop scene to assign"
+msgstr "Upuść scenę, by przypisać"
+
+#: addons/InstanceDock/Scenes/InstanceSlot.tscn
+msgid "Instances"
+msgstr "Instancje"
+
+#: addons/InstanceDock/Scripts/InstanceDock.gd
+msgid "Icons"
+msgstr "Ikony"
+
+#: addons/InstanceDock/Scripts/InstanceDock.gd
+msgid "Text"
+msgstr "Tekst"
+
+#: addons/InstanceDock/Scripts/InstanceSlot.gd
+msgid "Overrides:"
+msgstr "Nadpisane:"
+
+#: addons/InstanceDock/Scripts/InstanceSlot.gd
+msgid "Open Scene"
+msgstr "Otwórz scenę"
+
+#: addons/InstanceDock/Scripts/InstanceSlot.gd
+msgid "Override Properties"
+msgstr "Nadpisz właściwości"
+
+#: addons/InstanceDock/Scripts/InstanceSlot.gd
+msgid "Remove"
+msgstr "Usuń"
+
+#: addons/InstanceDock/Scripts/InstanceSlot.gd
+msgid "Remove Custom Icon"
+msgstr "Usuń własną ikonę"
+
+#: addons/InstanceDock/Scripts/InstanceSlot.gd
+msgid "Refresh Icon"
+msgstr "Odśwież ikonę"
+
+#: addons/InstanceDock/Scripts/InstanceSlot.gd
+msgid "Quick Load..."
+msgstr "Szybko wczytaj..."
+
+#: addons/InstanceDock/Scripts/PaintMode.gd
+msgid "(Re)Select any CanvasItem to start"
+msgstr "Wybierz (ponownie) jakiś CanvasItem, by rozpocząć"
+
+#: addons/InstanceDock/Scripts/PaintMode.gd
+msgid "Click instance slot to select"
+msgstr "Kliknij instancję, żeby wybrać"
+
+#: addons/InstanceDock/Scripts/PaintMode.gd
+msgid "Use LMB to paint instance"
+msgstr "Użyj LPM, by malować instancję"

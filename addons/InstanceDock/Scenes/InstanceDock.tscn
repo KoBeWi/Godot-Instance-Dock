@@ -1,17 +1,17 @@
 [gd_scene load_steps=6 format=3 uid="uid://d3a6r5br2nw5"]
 
-[ext_resource type="Script" uid="uid://c0f7ht031r3t8" path="res://addons/InstanceDock/InstanceDock.gd" id="2"]
-[ext_resource type="Texture2D" uid="uid://b81f1abox2e67" path="res://addons/InstanceDock/Textures/Uncollapse.svg" id="2_fqlvo"]
-[ext_resource type="Texture2D" uid="uid://buv26pii10cx2" path="res://addons/InstanceDock/Textures/Add.svg" id="2_p8olq"]
-[ext_resource type="Script" uid="uid://d16qd5wan2vm5" path="res://addons/InstanceDock/PaintMode.gd" id="2_yv7k5"]
-[ext_resource type="Texture2D" uid="uid://doleo6g38lico" path="res://addons/InstanceDock/Textures/GuiTabMenuHl.svg" id="3_sumeu"]
+[ext_resource type="Script" uid="uid://c0f7ht031r3t8" path="res://addons/InstanceDock/Scripts/InstanceDock.gd" id="1_lolgq"]
+[ext_resource type="Texture2D" uid="uid://buv26pii10cx2" path="res://addons/InstanceDock/Textures/Add.svg" id="2_gdgx1"]
+[ext_resource type="Texture2D" uid="uid://doleo6g38lico" path="res://addons/InstanceDock/Textures/GuiTabMenuHl.svg" id="3_bps6t"]
+[ext_resource type="Texture2D" uid="uid://b81f1abox2e67" path="res://addons/InstanceDock/Textures/Uncollapse.svg" id="4_eqqv5"]
+[ext_resource type="Script" uid="uid://d16qd5wan2vm5" path="res://addons/InstanceDock/Scripts/PaintMode.gd" id="5_qgjgt"]
 
 [node name="Instances" type="MarginContainer"]
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_right = 350.0
 grow_vertical = 2
-script = ExtResource("2")
+script = ExtResource("1_lolgq")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -22,6 +22,7 @@ size_flags_horizontal = 3
 
 [node name="Tabs" type="TabBar" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
+auto_translate_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 tab_close_display_policy = 1
@@ -29,7 +30,7 @@ drag_to_rearrange_enabled = true
 
 [node name="Button" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
-icon = ExtResource("2_p8olq")
+icon = ExtResource("2_gdgx1")
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -44,7 +45,7 @@ clear_button_enabled = true
 [node name="ViewMenu" type="MenuButton" parent="VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-icon = ExtResource("3_sumeu")
+icon = ExtResource("3_bps6t")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
@@ -85,7 +86,7 @@ autowrap_mode = 2
 [node name="ExtrasToggle" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-icon = ExtResource("2_fqlvo")
+icon = ExtResource("4_eqqv5")
 icon_alignment = 1
 
 [node name="Extras" type="VBoxContainer" parent="VBoxContainer"]
@@ -132,7 +133,7 @@ text = "Paint Mode"
 [node name="PaintMode" type="VBoxContainer" parent="VBoxContainer/Extras"]
 unique_name_in_owner = true
 layout_mode = 2
-script = ExtResource("2_yv7k5")
+script = ExtResource("5_qgjgt")
 
 [node name="Status" type="Label" parent="VBoxContainer/Extras/PaintMode"]
 unique_name_in_owner = true
@@ -162,6 +163,7 @@ suffix = "px"
 select_all_on_focus = true
 
 [node name="Label2" type="Label" parent="VBoxContainer/Extras/PaintMode/HBoxContainer/HBoxContainer"]
+auto_translate_mode = 2
 layout_mode = 2
 text = "x"
 

@@ -1,8 +1,8 @@
 @tool
 extends PanelContainer
 
-const InstanceDockPropertyEdit = preload("res://addons/InstanceDock/InstancePropertyEdit.gd")
-const InstanceDock = preload("res://addons/InstanceDock/InstanceDock.gd")
+const InstanceDockPropertyEdit = preload("res://addons/InstanceDock/Scripts/InstancePropertyEdit.gd")
+const InstanceDock = preload("res://addons/InstanceDock/Scripts/InstanceDock.gd")
 
 enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
 
@@ -137,7 +137,7 @@ func create_popup():
 		else:
 			popup.add_item("Refresh Icon", MenuOption.REFRESH)
 	
-	popup.add_item("Quick Load", MenuOption.QUICK_LOAD)
+	popup.add_item("Quick Load...", MenuOption.QUICK_LOAD)
 	
 	popup.reset_size()
 
@@ -197,7 +197,8 @@ func apply_data():
 	text.append(get_scene().get_base_dir())
 	
 	if data and not data.overrides.is_empty():
-		text.append("\nOverrides:")
+		text.append("")
+		text.append(tr("Overrides:"))
 		for override in data.overrides:
 			text.append("%s: %s" % [override, data.overrides[override]])
 	tooltip_text = "\n".join(text)

@@ -4,8 +4,16 @@ extends EditorPlugin
 var dock: Control
 var paint_mode: Control
 
+var translations: Array[Translation]
+
 func _enter_tree():
-	dock = preload("res://addons/InstanceDock/InstanceDock.tscn").instantiate()
+	var domain := TranslationServer.get_or_add_domain(&"godot.editor")
+	for file in ResourceLoader.list_directory("res://addons/InstanceDock/Translations"):
+		var translation: Translation = load("res://addons/InstanceDock/Translations".path_join(file))
+		translations.append(translation)
+		domain.add_translation(translation)
+	
+	dock = preload("res://addons/InstanceDock/Scenes/InstanceDock.tscn").instantiate()
 	dock.plugin = self
 	add_control_to_dock(EditorPlugin.DOCK_SLOT_LEFT_BR, dock)
 	paint_mode = dock.paint_mode
@@ -13,6 +21,10 @@ func _enter_tree():
 func _exit_tree():
 	remove_control_from_docks(dock)
 	dock.free()
+	
+	var domain := TranslationServer.get_or_add_domain(&"godot.editor")
+	for translation in translations:
+		domain.remove_translation(translation)
 
 func _handles(object: Object) -> bool:
 	return paint_mode.enabled and object is CanvasItem
