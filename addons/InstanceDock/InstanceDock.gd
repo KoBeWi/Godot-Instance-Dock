@@ -143,10 +143,9 @@ func _ready() -> void:
 	
 	if ProjectSettings.has_setting(PROJECT_SETTING_CONFIG):
 		CONFIG_FILE = ProjectSettings.get_setting(PROJECT_SETTING_CONFIG)
-		load_data()
 	else:
 		ProjectSettings.set_setting(PROJECT_SETTING_CONFIG, CONFIG_FILE)
-		save_data()
+	load_data()
 	
 	ProjectSettings.set_initial_value(PROJECT_SETTING_CONFIG, CONFIG_FILE)
 	ProjectSettings.add_property_info({ "name": PROJECT_SETTING_CONFIG, "type": TYPE_STRING, "hint": PROPERTY_HINT_SAVE_FILE })
@@ -174,7 +173,7 @@ func load_data():
 	
 	var file := FileAccess.open(CONFIG_FILE, FileAccess.READ)
 	if not file:
-		push_error("Failed loading Instance Dock scene data. Error loading file: %d." % FileAccess.get_open_error())
+		#push_error("Failed loading Instance Dock scene data. Error loading file: %d." % FileAccess.get_open_error())
 		return
 	
 	var loaded = str_to_var(file.get_as_text())
@@ -267,10 +266,12 @@ func add_tab_confirm(q = null) -> void:
 		tab_add_confirm.hide()
 	
 	tabs.add_tab(tab_add_name.text)
-	data.append({ "name": tab_add_name.text, "scenes": [] })
+	var new_tab := Data.Tab.new()
+	new_tab.name = tab_add_name.text
+	data.tab_data.append(new_tab)
 	save_data()
 	
-	if data.size() == 1:
+	if data.tab_data.size() == 1:
 		refresh_tab_contents()
 
 func on_tab_close_attempt(tab: int) -> void:
@@ -280,7 +281,7 @@ func on_tab_close_attempt(tab: int) -> void:
 func remove_tab_confirm() -> void:
 	if tab_to_remove != tabs.current_tab:
 		tab_to_remove = -1
-	data.remove_at(tab_to_remove)
+	data.tab_data.remove_at(tab_to_remove)
 	tabs.remove_tab(tab_to_remove)
 	save_data()
 	

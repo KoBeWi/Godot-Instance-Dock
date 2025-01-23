@@ -28,6 +28,9 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 
 func _get_window_layout(configuration: ConfigFile) -> void:
 	var tabs: TabBar = dock.tabs
+	if tabs.tab_count == 0:
+		return
+	
 	tabs.set_tab_metadata(tabs.current_tab, dock.scroll.scroll_vertical)
 	
 	for i in tabs.tab_count:
