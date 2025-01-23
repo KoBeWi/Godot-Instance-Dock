@@ -262,3 +262,6 @@ func _exit_tree() -> void:
 func unedit():
 	if EditorInterface.get_inspector().get_edited_object() is InstanceDockPropertyEdit:
 		EditorInterface.edit_node(null)
+
+func filter(text: String):
+	visible = text.is_subsequence_ofn(get_scene())

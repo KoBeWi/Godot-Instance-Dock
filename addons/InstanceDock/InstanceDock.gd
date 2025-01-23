@@ -100,6 +100,7 @@ class ProcessedItem:
 @onready var tab_add_confirm := %AddTabConfirm
 @onready var tab_add_name := %AddTabName
 @onready var tab_delete_confirm := %DeleteConfirm
+@onready var filter_line_edit: LineEdit = %FilterLineEdit
 @onready var view_menu: MenuButton = %ViewMenu
 
 @onready var scroll := %ScrollContainer
@@ -321,11 +322,14 @@ func refresh_tab_contents():
 		slot_container.hide()
 		add_tab_label.show()
 		drag_label.hide()
+		filter_line_edit.clear()
+		filter_line_edit.editable = false
 		return
 	else:
 		slot_container.show()
 		add_tab_label.hide()
 		drag_label.show()
+		filter_line_edit.editable = true
 	
 	if data.tab_data.size() > 0:
 		var tab_data := data.tab_data[tabs.current_tab]
@@ -342,6 +346,9 @@ func refresh_tab_contents():
 		await get_tree().process_frame
 		if scroll_value is int:
 			scroll.scroll_vertical = scroll_value
+	
+	if not filter_line_edit.text.is_empty():
+		_on_filter_changed(filter_line_edit.text)
 	
 	if paint_mode.enabled:
 		paint_mode.set_paint_mode_enabled(true)
@@ -559,3 +566,9 @@ func _drop_node(at: Vector2, data: Variant):
 		return
 	
 	set_default_parent(node)
+
+func _on_filter_changed(new_text: String) -> void:
+	for slot in slot_container.get_children():
+		slot.filter(new_text)
+	
+	drag_label.visible = new_text.is_empty()
