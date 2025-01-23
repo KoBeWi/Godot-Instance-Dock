@@ -7,6 +7,8 @@ const PROJECT_SETTING_PREVIEW = "addons/instance_dock/preview_resolution"
 var PREVIEW_SIZE = Vector2i(64, 64)
 var CONFIG_FILE = "res://InstanceDockSceneData.txt"
 
+enum {SLOT_MODE_ICONS, SLOT_MODE_TEXT}
+
 class Data:
 	class Instance:
 		var scene: String
@@ -98,9 +100,9 @@ class ProcessedItem:
 @onready var tab_add_confirm := %AddTabConfirm
 @onready var tab_add_name := %AddTabName
 @onready var tab_delete_confirm := %DeleteConfirm
+@onready var view_menu: MenuButton = %ViewMenu
 
 @onready var scroll := %ScrollContainer
-@onready var slot_container := %Slots
 @onready var add_tab_label := %AddTabLabel
 @onready var drag_label := %DragLabel
 
@@ -113,11 +115,15 @@ class ProcessedItem:
 
 @onready var icon_generator := $Viewport
 
+var slot_container: Node
+var slot_scene: PackedScene
+
 var data: Data
 var initialized: int
 
 var icon_cache: Dictionary
 var previous_tab: int
+var current_slot_mode: int = -1
 
 var tab_to_remove := -1
 var icon_queue: Array[ProcessedItem]
@@ -130,11 +136,17 @@ var plugin: EditorPlugin
 
 func _ready() -> void:
 	set_process(false)
-	DirAccess.make_dir_recursive_absolute(".godot/InstanceIconCache")
-	
 	if is_part_of_edited_scene():
 		return
 	
+	var popup := view_menu.get_popup()
+	popup.add_radio_check_item("Icons", SLOT_MODE_ICONS)
+	popup.add_radio_check_item("Text", SLOT_MODE_TEXT)
+	popup.set_item_checked(0, true)
+	set_slot_mode(SLOT_MODE_ICONS)
+	popup.id_pressed.connect(on_menu_option)
+	
+	DirAccess.make_dir_recursive_absolute(".godot/InstanceIconCache")
 	if ProjectSettings.has_setting(PROJECT_SETTING_LEGACY):
 		data = ProjectSettings.get_setting(PROJECT_SETTING_LEGACY)
 		for tab in data:
@@ -428,7 +440,7 @@ func generate_icon(scene_path: String, slot: Control):
 	set_process(true)
 
 func add_slot() -> Control:
-	var slot = preload("res://addons/InstanceDock/InstanceSlot.tscn").instantiate()
+	var slot: Control = slot_scene.instantiate()
 	slot_container.add_child(slot)
 	slot.setup_button(paint_mode.buttons)
 	slot.request_icon.connect(assign_icon.bind(slot))
@@ -497,6 +509,31 @@ func get_default_parent() -> Node:
 	elif parent:
 		set_default_parent(null)
 	return null
+
+func set_slot_mode(new_slot_mode: int):
+	if new_slot_mode == current_slot_mode:
+		return
+	
+	if slot_container:
+		for child in slot_container.get_children():
+			child.free()
+	
+	current_slot_mode = new_slot_mode
+	if current_slot_mode == SLOT_MODE_TEXT:
+		slot_container = %TextSlots
+		slot_scene = preload("res://addons/InstanceDock/InstanceSlotText.tscn")
+	else:
+		slot_container = %IconSlots
+		slot_scene = preload("res://addons/InstanceDock/InstanceSlot.tscn")
+	
+	refresh_tab_contents()
+
+func on_menu_option(id: int):
+	var popup := view_menu.get_popup()
+	if id == SLOT_MODE_ICONS or id == SLOT_MODE_TEXT:
+		popup.set_item_checked(0, id == SLOT_MODE_ICONS)
+		popup.set_item_checked(1, id == SLOT_MODE_TEXT)
+		set_slot_mode(id)
 
 func on_scene_changed():
 	set_default_parent(null)

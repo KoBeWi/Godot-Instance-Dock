@@ -9,9 +9,11 @@ enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
 @export var normal: StyleBox
 @export var custom: StyleBox
 
-@onready var icon := $Icon
-@onready var loading_icon = $Loading
-@onready var loading_animator := %AnimationPlayer
+@onready var icon: TextureRect = get_node_or_null(^"%Icon")
+@onready var path_label: Label = get_node_or_null(^"%Path")
+
+@onready var loading_icon: Sprite2D = %Loading
+@onready var loading_animator: AnimationPlayer = %AnimationPlayer
 @onready var timer: Timer = $Timer
 @onready var has_overrides: TextureRect = $HasOverrides
 @onready var text_label: Label = %Label
@@ -151,10 +153,7 @@ func menu_option(id: int) -> void:
 			editor.changed.connect(timer.start)
 		MenuOption.REMOVE:
 			data = null
-			
-			if EditorInterface.get_inspector().get_edited_object() is InstanceDockPropertyEdit:
-				EditorInterface.edit_node(null)
-			
+			unedit()
 			apply_data()
 			changed.emit()
 		MenuOption.REFRESH:
@@ -189,16 +188,22 @@ func set_data(p_data: InstanceDock.Data.Instance):
 
 func set_text_label(vis : bool):
 	text_label.visible = vis
+	if path_label:
+		path_label.visible = not vis
 
 func apply_data():
 	var text: PackedStringArray
 	text.append(get_scene().get_file())
+	text.append(get_scene().get_base_dir())
 	
 	if data and not data.overrides.is_empty():
 		text.append("\nOverrides:")
 		for override in data.overrides:
 			text.append("%s: %s" % [override, data.overrides[override]])
 	tooltip_text = "\n".join(text)
+	
+	if path_label:
+		path_label.text = get_scene().get_file()
 	
 	set_icon(null)
 	set_text_label(false)
@@ -225,6 +230,7 @@ func _on_timer_timeout() -> void:
 	has_overrides.visible = not data.overrides.is_empty()
 	apply_data()
 	menu_option(MenuOption.REFRESH)
+	changed.emit()
 
 func get_scene() -> String:
 	if not data:
@@ -248,6 +254,11 @@ func setup_button(group: ButtonGroup):
 	paint_button.button_group = group
 
 func _exit_tree() -> void:
+	unedit()
 	if thread:
 		thread.wait_to_finish()
 		thread = null
+
+func unedit():
+	if EditorInterface.get_inspector().get_edited_object() is InstanceDockPropertyEdit:
+		EditorInterface.edit_node(null)
