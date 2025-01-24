@@ -12,6 +12,7 @@ const GRID_SIZE = 7
 
 var buttons := ButtonGroup.new()
 var enabled: bool
+var continuous: Array[Vector2]
 
 var selected_scene: String
 var overrides: Dictionary[StringName, Variant]
@@ -127,7 +128,7 @@ func paint_input(event: InputEvent) -> bool:
 		return false
 	
 	if not edited_node:
-		push_error("Can't paint on nothing.")
+		EditorInterface.get_editor_toaster().push_toast("Can't paint on nothing.", EditorToaster.SEVERITY_WARNING)
 		return false
 	
 	if selected_scene.is_empty():
@@ -146,26 +147,16 @@ func paint_input(event: InputEvent) -> bool:
 			if snap_enabled.button_pressed:
 				preview.global_position = target_pos.snapped(Vector2(snap_x.value, snap_y.value))
 				update_overlays()
+				
+				if event.button_mask & MOUSE_BUTTON_MASK_LEFT and not preview.get_global_transform().origin in continuous:
+					paint()
 			else:
 				preview.global_position = target_pos
 	
 	if event is InputEventMouseButton:
 		if event.pressed:
 			if event.button_index == MOUSE_BUTTON_LEFT:
-				var parent: Node = owner.get_default_parent()
-				if not parent:
-					parent = edited_node
-				
-				var instance: CanvasItem = load(preview.scene_file_path).instantiate()
-				for override in overrides:
-					instance.set(override, overrides[override])
-				
-				var undo_redo := EditorInterface.get_editor_undo_redo()
-				undo_redo.create_action("InstanceDock paint instance", UndoRedo.MERGE_DISABLE, parent)
-				undo_redo.add_do_reference(instance)
-				undo_redo.add_do_method(self, &"add_instance", parent, EditorInterface.get_edited_scene_root(), instance, preview.get_global_transform())
-				undo_redo.add_undo_method(parent, &"remove_child", instance)
-				undo_redo.commit_action()
+				paint()
 				
 				return true
 			elif event.button_index == MOUSE_BUTTON_RIGHT:
@@ -179,6 +170,9 @@ func paint_input(event: InputEvent) -> bool:
 					scaling = false
 					update_overlays()
 					return true
+		else:
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				continuous.clear()
 	
 	if event is InputEventKey:
 		if event.echo:
@@ -215,6 +209,25 @@ func paint_input(event: InputEvent) -> bool:
 			return true
 	
 	return false
+
+func paint():
+	if snap_enabled.button_pressed:
+		continuous.append(preview.get_global_transform().origin)
+	
+	var parent: Node = owner.get_default_parent()
+	if not parent:
+		parent = edited_node
+	
+	var instance: CanvasItem = load(preview.scene_file_path).instantiate()
+	for override in overrides:
+		instance.set(override, overrides[override])
+	
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("InstanceDock paint instance", UndoRedo.MERGE_DISABLE, parent)
+	undo_redo.add_do_reference(instance)
+	undo_redo.add_do_method(self, &"add_instance", parent, EditorInterface.get_edited_scene_root(), instance, preview.get_global_transform())
+	undo_redo.add_undo_method(parent, &"remove_child", instance)
+	undo_redo.commit_action()
 
 func add_instance(parent: Node, own: Node, instance: CanvasItem, trans: Transform2D):
 	parent.add_child(instance, true)
