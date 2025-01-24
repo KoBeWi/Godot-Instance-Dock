@@ -1,13 +1,13 @@
 @tool
 extends EditorPlugin
 
+const PluginUtils = preload("res://addons/InstanceDock/PluginUtils.gd")
+
 var dock: Control
 var paint_mode: Control
 
 func _init() -> void:
-	const PluginTranslator = preload("res://addons/InstanceDock/PluginTranslator.gd")
-	
-	var translator := PluginTranslator.new(self)
+	var translator := PluginUtils.translate_plugin(self)
 	translator.add_translations_from_directory("res://addons/InstanceDock/Translations")
 
 func _ready() -> void:

@@ -1,6 +1,7 @@
 @tool
 extends Control
 
+const PluginUtils = preload("res://addons/InstanceDock/PluginUtils.gd")
 const PROJECT_SETTING_CONFIG = "addons/instance_dock/scene_data_file"
 const PROJECT_SETTING_LEGACY = "addons/instance_dock/scenes"
 const PROJECT_SETTING_PREVIEW = "addons/instance_dock/preview_resolution"
@@ -154,24 +155,14 @@ func _ready() -> void:
 			tab.erase("scroll")
 		ProjectSettings.set_setting(PROJECT_SETTING_LEGACY, null)
 	
-	if ProjectSettings.has_setting(PROJECT_SETTING_CONFIG):
-		CONFIG_FILE = ProjectSettings.get_setting(PROJECT_SETTING_CONFIG)
-	else:
-		ProjectSettings.set_setting(PROJECT_SETTING_CONFIG, CONFIG_FILE)
+	CONFIG_FILE = PluginUtils.define_project_setting(PROJECT_SETTING_CONFIG, CONFIG_FILE, PROPERTY_HINT_SAVE_FILE)
 	load_data()
 	
-	ProjectSettings.set_initial_value(PROJECT_SETTING_CONFIG, CONFIG_FILE)
-	ProjectSettings.add_property_info({ "name": PROJECT_SETTING_CONFIG, "type": TYPE_STRING, "hint": PROPERTY_HINT_SAVE_FILE })
-	
-	if ProjectSettings.has_setting(PROJECT_SETTING_PREVIEW):
-		PREVIEW_SIZE = ProjectSettings.get_setting(PROJECT_SETTING_PREVIEW)
-	else:
-		ProjectSettings.set_setting(PROJECT_SETTING_PREVIEW, PREVIEW_SIZE)
-	
-	ProjectSettings.set_initial_value(PROJECT_SETTING_PREVIEW, PREVIEW_SIZE)
+	PREVIEW_SIZE = PluginUtils.define_project_setting(PROJECT_SETTING_PREVIEW, PREVIEW_SIZE)
 	icon_generator.size = PREVIEW_SIZE
 	
-	plugin.project_settings_changed.connect(update_settings)
+	PluginUtils.track_project_setting(PROJECT_SETTING_CONFIG, self, _project_setting_changed)
+	PluginUtils.track_project_setting(PROJECT_SETTING_PREVIEW, self, _project_setting_changed)
 	
 	for tab in data.tab_data:
 		tabs.add_tab(tab.name)
@@ -204,19 +195,15 @@ func save_data():
 	
 	file.store_string(var_to_str(data.save_data()))
 
-func update_settings():
-	if ProjectSettings.has_setting(PROJECT_SETTING_PREVIEW):
-		var new_preview_size: Vector2i = ProjectSettings.get_setting(PROJECT_SETTING_PREVIEW)
-		if new_preview_size != PREVIEW_SIZE:
-			PREVIEW_SIZE = new_preview_size
-			icon_generator.size = PREVIEW_SIZE
+func _project_setting_changed(setting: String, new_value: Variant):
+	if setting == PROJECT_SETTING_PREVIEW:
+		PREVIEW_SIZE = new_value
+		icon_generator.size = PREVIEW_SIZE
 	
-	if ProjectSettings.has_setting(PROJECT_SETTING_CONFIG):
-		var new_config_file: String = ProjectSettings.get_setting(PROJECT_SETTING_CONFIG)
-		if new_config_file != CONFIG_FILE:
-			if FileAccess.file_exists(CONFIG_FILE):
-				DirAccess.rename_absolute(CONFIG_FILE, new_config_file)
-			CONFIG_FILE = new_config_file
+	elif setting == PROJECT_SETTING_CONFIG:
+		if FileAccess.file_exists(CONFIG_FILE):
+			DirAccess.rename_absolute(CONFIG_FILE, new_value)
+		CONFIG_FILE = new_value
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_BEGIN:
