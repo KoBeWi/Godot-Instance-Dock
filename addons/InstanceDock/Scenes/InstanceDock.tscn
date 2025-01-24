@@ -211,6 +211,8 @@ render_target_update_mode = 3
 [connection signal="toggled" from="VBoxContainer/Extras/CheckButton" to="VBoxContainer/Extras/PaintMode" method="set_paint_mode_enabled"]
 [connection signal="toggled" from="VBoxContainer/Extras/CheckButton" to="VBoxContainer/Extras/PaintMode" method="set_visible"]
 [connection signal="pressed" from="VBoxContainer/Extras/PaintMode/HBoxContainer/SnapEnabled" to="VBoxContainer/Extras/PaintMode" method="update_overlays"]
+[connection signal="value_changed" from="VBoxContainer/Extras/PaintMode/HBoxContainer/HBoxContainer/SnapX" to="VBoxContainer/Extras/PaintMode" method="_on_snap_changed"]
+[connection signal="value_changed" from="VBoxContainer/Extras/PaintMode/HBoxContainer/HBoxContainer/SnapY" to="VBoxContainer/Extras/PaintMode" method="_on_snap_changed"]
 [connection signal="confirmed" from="Dialogs/DeleteConfirm" to="." method="remove_tab_confirm"]
 [connection signal="confirmed" from="Dialogs/AddTabConfirm" to="." method="add_tab_confirm"]
 [connection signal="text_submitted" from="Dialogs/AddTabConfirm/AddTabName" to="." method="add_tab_confirm"]

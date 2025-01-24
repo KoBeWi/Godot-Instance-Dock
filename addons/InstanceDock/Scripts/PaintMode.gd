@@ -39,6 +39,10 @@ func _ready() -> void:
 	hide()
 	font = EditorInterface.get_editor_theme().get_font(&"main", &"EditorFonts")
 	buttons.pressed.connect(on_button_pressed)
+	
+	var snap_size: Vector2i = EditorInterface.get_editor_settings().get_project_metadata("instance_dock", "snap_size", Vector2i(8, 8))
+	snap_x.set_value_no_signal(snap_size.x)
+	snap_y.set_value_no_signal(snap_size.y)
 
 func set_paint_mode_enabled(toggled_on: bool) -> void:
 	var was_enabled := enabled
@@ -273,3 +277,6 @@ func update_status():
 
 func update_overlays() -> void:
 	plugin.update_overlays()
+
+func _on_snap_changed(value: float) -> void:
+	EditorInterface.get_editor_settings().set_project_metadata("instance_dock", "snap_size", Vector2i(snap_x.value, snap_y.value))
