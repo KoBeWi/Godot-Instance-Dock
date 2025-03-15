@@ -69,7 +69,7 @@ Due to engine limitations, you need to select a CanvasItem (Node2D or Control) i
 
 ![](Media/ReadmePaint.gif)
 
-When you enable Snap, the editor will display a basic grid near the cursor and the instance will be snapped to the grid.
+When you enable Snap, the editor will display a basic grid near the cursor and the instance will be snapped to the grid. With snap enabled you can also paint continuously.
 
 ![](Media/ReadmeGrid.png)
 
