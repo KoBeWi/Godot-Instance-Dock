@@ -56,15 +56,31 @@ class PluginTranslator:
 			domain.remove_translation(translation)
 
 class ProjectSettingTracker:
+	class ActualTracker:
+		var trackers: Array[ProjectSettingTracker]
+		
+		func _init() -> void:
+			ProjectSettings.settings_changed.connect(_settings_changed)
+		
+		func _settings_changed():
+			for tracker in trackers:
+				tracker._check_setting()
+	
 	var callback: Callable
 	var tracked_setting: String
 	var prev_value: Variant
 	
 	func _init(owner: Object, setting: String) -> void:
-		owner.set_meta(str("_tracker", abs(get_instance_id())), self)
+		var actual_tracker: ActualTracker
+		if owner.has_meta(&"_settings_tracker"):
+			actual_tracker = owner.get_meta(&"_settings_tracker")
+		else:
+			actual_tracker = ActualTracker.new()
+			owner.set_meta(&"_settings_tracker", actual_tracker)
+		
 		tracked_setting = setting
 		prev_value = ProjectSettings.get_setting(tracked_setting)
-		ProjectSettings.settings_changed.connect(_check_setting)
+		actual_tracker.trackers.append(self)
 	
 	func _check_setting():
 		var new_value := ProjectSettings.get_setting(tracked_setting)
