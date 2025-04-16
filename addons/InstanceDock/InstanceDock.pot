@@ -71,8 +71,8 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
-#: addons/InstanceDock/Scripts/InstanceSlot.gd
-msgid "Overrides:"
+#: addons/InstanceDock/Scripts/InstanceDock.gd
+msgid "Refresh All Previews"
 msgstr ""
 
 #: addons/InstanceDock/Scripts/InstanceSlot.gd
@@ -97,6 +97,10 @@ msgstr ""
 
 #: addons/InstanceDock/Scripts/InstanceSlot.gd
 msgid "Quick Load..."
+msgstr ""
+
+#: addons/InstanceDock/Scripts/InstanceSlot.gd
+msgid "Overrides:"
 msgstr ""
 
 #: addons/InstanceDock/Scripts/PaintMode.gd

@@ -5,10 +5,12 @@ const PluginUtils = preload("res://addons/InstanceDock/PluginUtils.gd")
 const PROJECT_SETTING_CONFIG = "addons/instance_dock/scene_data_file"
 const PROJECT_SETTING_LEGACY = "addons/instance_dock/scenes"
 const PROJECT_SETTING_PREVIEW = "addons/instance_dock/preview_resolution"
+const CACHE_PATH = "res://.godot/InstanceIconCache"
+
 var PREVIEW_SIZE = Vector2i(64, 64)
 var CONFIG_FILE = "res://InstanceDockSceneData.txt"
 
-enum {SLOT_MODE_ICONS, SLOT_MODE_TEXT}
+enum {SLOT_MODE_ICONS, SLOT_MODE_TEXT, REFRESH_ALL_PREVIEWS}
 
 class Data:
 	class Instance:
@@ -144,11 +146,14 @@ func _ready() -> void:
 	var popup := view_menu.get_popup()
 	popup.add_radio_check_item("Icons", SLOT_MODE_ICONS)
 	popup.add_radio_check_item("Text", SLOT_MODE_TEXT)
+	popup.add_separator()
+	popup.add_radio_check_item("Refresh All Previews", REFRESH_ALL_PREVIEWS)
+	
 	popup.set_item_checked(0, true)
 	set_slot_mode(SLOT_MODE_ICONS)
 	popup.id_pressed.connect(on_menu_option)
 	
-	DirAccess.make_dir_recursive_absolute(".godot/InstanceIconCache")
+	DirAccess.make_dir_recursive_absolute(CACHE_PATH)
 	if ProjectSettings.has_setting(PROJECT_SETTING_LEGACY):
 		data = ProjectSettings.get_setting(PROJECT_SETTING_LEGACY)
 		for tab in data:
@@ -384,7 +389,7 @@ func _process(delta: float) -> void:
 				instance.position = PREVIEW_SIZE / 2
 		3:
 			var image = icon_generator.get_texture().get_image()
-			image.save_png(".godot/InstanceIconCache/%s.png" % slot.get_hash())
+			image.save_png(CACHE_PATH.path_join("%s.png" % slot.get_hash()))
 			var texture = ImageTexture.create_from_image(image)
 			slot.set_icon(texture)
 			icon_cache[slot.get_hash()] = texture
@@ -416,7 +421,7 @@ func assign_icon(scene_path: String, ignore_cache: bool, slot: Control):
 			slot.set_icon(icon)
 			return
 		else:
-			var cache_path := ".godot/InstanceIconCache/%s.png" % hash
+			var cache_path := CACHE_PATH.path_join("%s.png" % hash)
 			if FileAccess.file_exists(cache_path):
 				var queued := ProcessedItem.new()
 				queued.icon_path = cache_path
@@ -528,6 +533,16 @@ func on_menu_option(id: int):
 		popup.set_item_checked(0, id == SLOT_MODE_ICONS)
 		popup.set_item_checked(1, id == SLOT_MODE_TEXT)
 		set_slot_mode(id)
+	elif id == REFRESH_ALL_PREVIEWS:
+		icon_cache.clear()
+		
+		var da := DirAccess.open(CACHE_PATH)
+		for file in da.get_files():
+			da.remove(file)
+		
+		for slot in slot_container.get_children():
+			if slot.is_valid():
+				slot.menu_option(slot.MenuOption.REFRESH)
 
 func on_scene_changed():
 	set_default_parent(null)

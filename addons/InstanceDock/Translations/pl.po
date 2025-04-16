@@ -80,9 +80,9 @@ msgstr "Ikony"
 msgid "Text"
 msgstr "Tekst"
 
-#: addons/InstanceDock/Scripts/InstanceSlot.gd
-msgid "Overrides:"
-msgstr "Nadpisane:"
+#: addons/InstanceDock/Scripts/InstanceDock.gd
+msgid "Refresh All Previews"
+msgstr "Odśwież wszystkie podglądy"
 
 #: addons/InstanceDock/Scripts/InstanceSlot.gd
 msgid "Open Scene"
@@ -107,6 +107,10 @@ msgstr "Odśwież ikonę"
 #: addons/InstanceDock/Scripts/InstanceSlot.gd
 msgid "Quick Load..."
 msgstr "Szybko wczytaj..."
+
+#: addons/InstanceDock/Scripts/InstanceSlot.gd
+msgid "Overrides:"
+msgstr "Nadpisane:"
 
 #: addons/InstanceDock/Scripts/PaintMode.gd
 msgid "(Re)Select any CanvasItem to start"
