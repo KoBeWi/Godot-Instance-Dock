@@ -12,18 +12,18 @@ var CONFIG_FILE = "res://InstanceDockSceneData.txt"
 
 enum {SLOT_MODE_ICONS, SLOT_MODE_TEXT, REFRESH_ALL_PREVIEWS}
 
-class Data:
-	class Instance:
+class InstanceDock_Data:
+	class InstanceDock_Instance:
 		var scene: String
 		var custom_texture: String
 		var overrides: Dictionary[StringName, Variant]
 	
-	class Tab:
+	class InstanceDock_Tab:
 		var name: String
-		var instances: Array[Instance]
+		var instances: Array[InstanceDock_Instance]
 	
 	var version: int
-	var tab_data: Array[Tab]
+	var tab_data: Array[InstanceDock_Tab]
 	
 	func load_data(loaded):
 		var dict: Dictionary
@@ -35,12 +35,12 @@ class Data:
 		version = dict.get("version", -1)
 		
 		for tab_dict: Dictionary in dict["tab_data"]:
-			var tab := Data.Tab.new()
+			var tab := InstanceDock_Data.InstanceDock_Tab.new()
 			tab_data.append(tab)
 			tab.name = tab_dict.get("name", "")
 			
 			for dict_instance: Dictionary in tab_dict.get("scenes", []):
-				var instance := Data.Instance.new()
+				var instance := InstanceDock_Data.InstanceDock_Instance.new()
 				tab.instances.append(instance)
 				
 				instance.scene = dict_instance.get("scene", "")
@@ -122,7 +122,7 @@ class ProcessedItem:
 var slot_container: Node
 var slot_scene: PackedScene
 
-var data: Data
+var data: InstanceDock_Data
 var initialized: int
 
 var icon_cache: Dictionary
@@ -178,7 +178,7 @@ func _ready() -> void:
 	parent_selector.set_drag_forwarding(Callable(), _can_drop_node, _drop_node)
 
 func load_data():
-	data = Data.new()
+	data = InstanceDock_Data.new()
 	
 	var file := FileAccess.open(CONFIG_FILE, FileAccess.READ)
 	if not file:
@@ -271,7 +271,7 @@ func add_tab_confirm(q = null) -> void:
 		tab_add_confirm.hide()
 	
 	tabs.add_tab(tab_add_name.text)
-	var new_tab := Data.Tab.new()
+	var new_tab := InstanceDock_Data.InstanceDock_Tab.new()
 	new_tab.name = tab_add_name.text
 	data.tab_data.append(new_tab)
 	save_data()
@@ -332,7 +332,7 @@ func refresh_tab_contents():
 			if i < scenes.size():
 				slot_container.get_child(i).set_data(scenes[i])
 			else:
-				slot_container.get_child(i).set_data(Data.Instance.new())
+				slot_container.get_child(i).set_data(InstanceDock_Data.InstanceDock_Instance.new())
 		
 		var scroll_value = tabs.get_tab_metadata(tabs.current_tab)
 		await get_tree().process_frame
@@ -347,7 +347,7 @@ func refresh_tab_contents():
 
 func remove_scene(slot: int):
 	var tab_scenes := data.tab_data[tabs.current_tab].instances
-	tab_scenes[slot] = Data.Instance.new()
+	tab_scenes[slot] = InstanceDock_Data.InstanceDock_Instance.new()
 	while not tab_scenes.is_empty() and tab_scenes.back().is_empty():
 		tab_scenes.pop_back()
 

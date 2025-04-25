@@ -19,7 +19,7 @@ enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
 @onready var text_label: Label = %Label
 @onready var paint_button: Button = $PaintButton
 
-var data: InstanceDock.Data.Instance
+var data: InstanceDock.InstanceDock_Data.InstanceDock_Instance
 var popup: PopupMenu
 var thread: Thread
 
@@ -64,7 +64,7 @@ func _drop_data(at_position: Vector2, drop_data) -> void:
 			if slot2 == self:
 				return
 			
-			var data2: InstanceDock.Data.Instance = slot2.data
+			var data2: InstanceDock.InstanceDock_Data.InstanceDock_Instance = slot2.data
 			slot2.set_data(data)
 			set_data(data2)
 		else:
@@ -172,7 +172,7 @@ func menu_option(id: int) -> void:
 					changed.emit()
 				, ["PackedScene"])
 
-func get_data() -> InstanceDock.Data.Instance:
+func get_data() -> InstanceDock.InstanceDock_Data.InstanceDock_Instance:
 	return data
 
 func set_scene(scene: String):
@@ -180,12 +180,12 @@ func set_scene(scene: String):
 	if uid != ResourceUID.INVALID_ID:
 		scene = ResourceUID.id_to_text(uid)
 	
-	data = InstanceDock.Data.Instance.new()
+	data = InstanceDock.InstanceDock_Data.InstanceDock_Instance.new()
 	data.scene = scene
 	filter_cache = ""
 	apply_data()
 
-func set_data(p_data: InstanceDock.Data.Instance):
+func set_data(p_data: InstanceDock.InstanceDock_Data.InstanceDock_Instance):
 	data = p_data
 	filter_cache = ""
 	apply_data()
