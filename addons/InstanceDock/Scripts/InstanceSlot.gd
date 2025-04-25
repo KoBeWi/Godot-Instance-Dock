@@ -23,6 +23,8 @@ var data: InstanceDock.Data.Instance
 var popup: PopupMenu
 var thread: Thread
 
+var filter_cache: String
+
 signal request_icon(instance, ignore_cache)
 signal changed
 
@@ -180,10 +182,12 @@ func set_scene(scene: String):
 	
 	data = InstanceDock.Data.Instance.new()
 	data.scene = scene
+	filter_cache = ""
 	apply_data()
 
 func set_data(p_data: InstanceDock.Data.Instance):
 	data = p_data
+	filter_cache = ""
 	apply_data()
 
 func set_text_label(vis : bool):
@@ -265,4 +269,7 @@ func unedit():
 		EditorInterface.edit_node(null)
 
 func filter(text: String):
-	visible = text.is_subsequence_ofn(get_scene())
+	if filter_cache.is_empty():
+		filter_cache = get_scene().to_lower()
+	
+	visible = text.is_empty() or filter_cache.contains(text)

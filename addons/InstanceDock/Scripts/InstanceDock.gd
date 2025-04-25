@@ -570,6 +570,7 @@ func _drop_node(at: Vector2, data: Variant):
 	set_default_parent(node)
 
 func _on_filter_changed(new_text: String) -> void:
+	new_text = new_text.to_lower()
 	for slot in slot_container.get_children():
 		slot.filter(new_text)
 	
