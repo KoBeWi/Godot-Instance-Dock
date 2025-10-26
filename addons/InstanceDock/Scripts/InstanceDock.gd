@@ -1,5 +1,5 @@
 @tool
-extends Control
+extends EditorDock
 
 const PluginUtils = preload("res://addons/InstanceDock/PluginUtils.gd")
 const PROJECT_SETTING_CONFIG = "addons/instance_dock/scene_data_file"
@@ -12,93 +12,6 @@ var CONFIG_FILE = "res://InstanceDockSceneData.txt"
 
 enum {SLOT_MODE_ICONS, SLOT_MODE_TEXT, REFRESH_ALL_PREVIEWS}
 
-class InstanceDock_Data:
-	class InstanceDock_Instance:
-		var scene: String
-		var custom_texture: String
-		var overrides: Dictionary[StringName, Variant]
-	
-	class InstanceDock_Tab:
-		var name: String
-		var instances: Array[InstanceDock_Instance]
-	
-	var version: int
-	var tab_data: Array[InstanceDock_Tab]
-	
-	func load_data(loaded):
-		var dict: Dictionary
-		if loaded is Dictionary:
-			dict = loaded
-		else:
-			dict = {"tab_data": loaded}
-		
-		version = dict.get("version", -1)
-		
-		for tab_dict: Dictionary in dict["tab_data"]:
-			var tab := InstanceDock_Data.InstanceDock_Tab.new()
-			tab_data.append(tab)
-			tab.name = tab_dict.get("name", "")
-			
-			for dict_instance: Dictionary in tab_dict.get("scenes", []):
-				var instance := InstanceDock_Data.InstanceDock_Instance.new()
-				tab.instances.append(instance)
-				
-				instance.scene = dict_instance.get("scene", "")
-				if version == -1:
-					var uid := ResourceLoader.get_resource_uid(instance.scene)
-					if uid != ResourceUID.INVALID_ID:
-						instance.scene = ResourceUID.id_to_text(uid)
-				
-				instance.custom_texture = dict_instance.get("custom_texture", "")
-				if version == -1:
-					var uid := ResourceLoader.get_resource_uid(instance.custom_texture)
-					if uid != ResourceUID.INVALID_ID:
-						instance.custom_texture = ResourceUID.id_to_text(uid)
-				
-				instance.overrides.assign(dict_instance.get("overrides", {}))
-		
-		version = 0
-	
-	func save_data() -> Dictionary:
-		var data: Dictionary
-		
-		data["version"] = version
-		
-		var save_tabs: Array
-		data["tab_data"] = save_tabs
-		
-		for tab in tab_data:
-			var tab_dict: Dictionary
-			save_tabs.append(tab_dict)
-			tab_dict["name"] = tab.name
-			
-			var instances: Array
-			for instance in tab.instances:
-				var instance_dict: Dictionary
-				instances.append(instance_dict)
-				
-				if instance:
-					instance_dict["scene"] = instance.scene
-					if not instance.custom_texture.is_empty():
-						instance_dict["custom_texture"] = instance.custom_texture
-					if not instance.overrides.is_empty():
-						var untyped: Dictionary
-						untyped.assign(instance.overrides)
-						instance_dict["overrides"] = untyped
-				
-				if not instances.is_empty():
-					tab_dict["scenes"] = instances
-		
-		return data
-
-class ProcessedItem:
-	var icon_path: String
-	var icon: Texture2D
-	var instance_path: String
-	var instance: Node
-	var slot: Control
-	var overrides: Dictionary[StringName, Variant]
-
 @onready var tabs: TabBar = %Tabs
 @onready var tab_add_confirm := %AddTabConfirm
 @onready var tab_add_name := %AddTabName
@@ -106,11 +19,17 @@ class ProcessedItem:
 @onready var filter_line_edit: LineEdit = %FilterLineEdit
 @onready var view_menu: MenuButton = %ViewMenu
 
+@onready var top_container: HBoxContainer = %TopContainer
+@onready var bottom_extras: VBoxContainer = %BottomExtras
+@onready var side_extras: HBoxContainer = %SideExtras
+@onready var v_box_container: VBoxContainer = %VBoxContainer
+
 @onready var scroll := %ScrollContainer
 @onready var add_tab_label := %AddTabLabel
 @onready var drag_label := %DragLabel
 
 @onready var extras_toggle: Button = %ExtrasToggle
+@onready var extras_toggle2: Button = %ExtrasToggle2
 @onready var extras: VBoxContainer = %Extras
 @onready var parent_selector: HBoxContainer = %ParentSelector
 @onready var parent_icon: TextureRect = %ParentIcon
@@ -128,6 +47,7 @@ var initialized: int
 var icon_cache: Dictionary
 var previous_tab: int
 var current_slot_mode: int = -1
+var layout_vertical := true
 
 var tab_to_remove := -1
 var icon_queue: Array[ProcessedItem]
@@ -211,6 +131,13 @@ func _project_setting_changed(setting: String, new_value: Variant):
 		CONFIG_FILE = new_value
 
 func _notification(what: int) -> void:
+	if is_part_of_edited_scene():
+		return
+	
+	if what == NOTIFICATION_READY:
+		drag_label.owner = null
+		return
+	
 	if what == NOTIFICATION_DRAG_BEGIN:
 		var drag_data = get_viewport().gui_get_drag_data()
 		if drag_data is Dictionary and "instance_dock_overrides" in drag_data:
@@ -479,9 +406,11 @@ func on_rearrange(idx_to: int) -> void:
 func toggle_extras() -> void:
 	extras.visible = not extras.visible
 	if extras.visible:
-		extras_toggle.icon = preload("res://addons/InstanceDock/Textures/Collapse.svg")
+		extras_toggle.icon = preload("uid://dpa3fyapmielg")
+		extras_toggle2.icon = preload("uid://bx3v57l4mrrmi")
 	else:
-		extras_toggle.icon = preload("res://addons/InstanceDock/Textures/Uncollapse.svg")
+		extras_toggle.icon = preload("uid://b81f1abox2e67")
+		extras_toggle2.icon = preload("uid://cr5fieqinie62")
 
 func set_default_parent(node: Node):
 	if default_parent == node and not (default_parent and not node):
@@ -575,3 +504,111 @@ func _on_filter_changed(new_text: String) -> void:
 		slot.filter(new_text)
 	
 	drag_label.visible = new_text.is_empty()
+
+func _update_layout(layout: int) -> void:
+	var new_vertical := layout == DOCK_LAYOUT_VERTICAL
+	if layout_vertical != new_vertical:
+		layout_vertical = new_vertical
+		
+		if layout_vertical:
+			drag_label.reparent(v_box_container)
+			drag_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+			
+			extras.reparent(bottom_extras)
+			bottom_extras.show()
+			side_extras.hide()
+		else:
+			drag_label.reparent(top_container)
+			top_container.move_child(drag_label, 1)
+			drag_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+			
+			extras.reparent(side_extras)
+			bottom_extras.hide()
+			side_extras.show()
+
+class InstanceDock_Data:
+	class InstanceDock_Instance:
+		var scene: String
+		var custom_texture: String
+		var overrides: Dictionary[StringName, Variant]
+	
+	class InstanceDock_Tab:
+		var name: String
+		var instances: Array[InstanceDock_Instance]
+	
+	var version: int
+	var tab_data: Array[InstanceDock_Tab]
+	
+	func load_data(loaded):
+		var dict: Dictionary
+		if loaded is Dictionary:
+			dict = loaded
+		else:
+			dict = {"tab_data": loaded}
+		
+		version = dict.get("version", -1)
+		
+		for tab_dict: Dictionary in dict["tab_data"]:
+			var tab := InstanceDock_Data.InstanceDock_Tab.new()
+			tab_data.append(tab)
+			tab.name = tab_dict.get("name", "")
+			
+			for dict_instance: Dictionary in tab_dict.get("scenes", []):
+				var instance := InstanceDock_Data.InstanceDock_Instance.new()
+				tab.instances.append(instance)
+				
+				instance.scene = dict_instance.get("scene", "")
+				if version == -1:
+					var uid := ResourceLoader.get_resource_uid(instance.scene)
+					if uid != ResourceUID.INVALID_ID:
+						instance.scene = ResourceUID.id_to_text(uid)
+				
+				instance.custom_texture = dict_instance.get("custom_texture", "")
+				if version == -1:
+					var uid := ResourceLoader.get_resource_uid(instance.custom_texture)
+					if uid != ResourceUID.INVALID_ID:
+						instance.custom_texture = ResourceUID.id_to_text(uid)
+				
+				instance.overrides.assign(dict_instance.get("overrides", {}))
+		
+		version = 0
+	
+	func save_data() -> Dictionary:
+		var data: Dictionary
+		
+		data["version"] = version
+		
+		var save_tabs: Array
+		data["tab_data"] = save_tabs
+		
+		for tab in tab_data:
+			var tab_dict: Dictionary
+			save_tabs.append(tab_dict)
+			tab_dict["name"] = tab.name
+			
+			var instances: Array
+			for instance in tab.instances:
+				var instance_dict: Dictionary
+				instances.append(instance_dict)
+				
+				if instance:
+					instance_dict["scene"] = instance.scene
+					if not instance.custom_texture.is_empty():
+						instance_dict["custom_texture"] = instance.custom_texture
+					if not instance.overrides.is_empty():
+						var untyped: Dictionary
+						untyped.assign(instance.overrides)
+						instance_dict["overrides"] = untyped
+				
+				if not instances.is_empty():
+					tab_dict["scenes"] = instances
+		
+		return data
+
+class ProcessedItem:
+	var icon_path: String
+	var icon: Texture2D
+	var instance_path: String
+	var instance: Node
+	var slot: Control
+	var overrides: Dictionary[StringName, Variant]

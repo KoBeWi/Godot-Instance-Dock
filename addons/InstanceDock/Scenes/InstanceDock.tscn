@@ -6,21 +6,29 @@
 [ext_resource type="Texture2D" uid="uid://b81f1abox2e67" path="res://addons/InstanceDock/Textures/Uncollapse.svg" id="4_eqqv5"]
 [ext_resource type="Script" uid="uid://d16qd5wan2vm5" path="res://addons/InstanceDock/Scripts/PaintMode.gd" id="5_qgjgt"]
 
-[node name="Instances" type="MarginContainer"]
+[node name="InstanceDock" type="EditorDock" unique_id=2014298426]
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_right = 350.0
 grow_vertical = 2
+title = "Instances"
+icon_name = &"PackedScene"
+default_slot = 3
+available_layouts = 3
 script = ExtResource("1_lolgq")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1067319394]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=1571061905]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Tabs" type="TabBar" parent="VBoxContainer/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer" unique_id=953994152]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Tabs" type="TabBar" parent="HBoxContainer/VBoxContainer/HBoxContainer" unique_id=120880978]
 unique_name_in_owner = true
 auto_translate_mode = 2
 layout_mode = 2
@@ -28,84 +36,90 @@ size_flags_horizontal = 3
 tab_close_display_policy = 1
 drag_to_rearrange_enabled = true
 
-[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="Button" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1928027103]
 layout_mode = 2
 icon = ExtResource("2_gdgx1")
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+[node name="TopContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer" unique_id=1211122357]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="FilterLineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer2"]
+[node name="FilterLineEdit" type="LineEdit" parent="HBoxContainer/VBoxContainer/TopContainer" unique_id=863306413]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Filter Instances"
 clear_button_enabled = true
 
-[node name="ViewMenu" type="MenuButton" parent="VBoxContainer/HBoxContainer2"]
+[node name="ViewMenu" type="MenuButton" parent="HBoxContainer/VBoxContainer/TopContainer" unique_id=1445183230]
 unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("3_bps6t")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VBoxContainer" unique_id=1857823154]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/ScrollContainer" unique_id=1760687112]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="IconSlots" type="HFlowContainer" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
+[node name="IconSlots" type="HFlowContainer" parent="HBoxContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1763459668]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="TextSlots" type="VBoxContainer" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
+[node name="TextSlots" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=121416047]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AddTabLabel" type="Label" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
+[node name="AddTabLabel" type="Label" parent="HBoxContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=893826369]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Add tab to continue."
 autowrap_mode = 2
 
-[node name="DragLabel" type="Label" parent="VBoxContainer/ScrollContainer/VBoxContainer"]
+[node name="DragLabel" type="Label" parent="HBoxContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=177013354]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 text = "Drag scene from file system on a slot to assign or right-click to Quick Load."
 autowrap_mode = 2
 
-[node name="ExtrasToggle" type="Button" parent="VBoxContainer"]
+[node name="BottomExtras" type="VBoxContainer" parent="HBoxContainer/VBoxContainer" unique_id=97909818]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ExtrasToggle" type="Button" parent="HBoxContainer/VBoxContainer/BottomExtras" unique_id=1819527858]
 unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("4_eqqv5")
 icon_alignment = 1
 
-[node name="Extras" type="VBoxContainer" parent="VBoxContainer"]
+[node name="Extras" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/BottomExtras" unique_id=1213893627]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Extras"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras" unique_id=1093471246]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/Extras/HBoxContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/HBoxContainer" unique_id=1749179059]
 layout_mode = 2
 text = "Parent"
 
-[node name="ParentSelector" type="HBoxContainer" parent="VBoxContainer/Extras/HBoxContainer"]
+[node name="ParentSelector" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/HBoxContainer" unique_id=2062099406]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ParentIcon" type="TextureRect" parent="VBoxContainer/Extras/HBoxContainer/ParentSelector"]
+[node name="ParentIcon" type="TextureRect" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/HBoxContainer/ParentSelector" unique_id=357648234]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -113,8 +127,9 @@ mouse_filter = 2
 expand_mode = 2
 stretch_mode = 3
 
-[node name="ParentName" type="LineEdit" parent="VBoxContainer/Extras/HBoxContainer/ParentSelector"]
+[node name="ParentName" type="LineEdit" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/HBoxContainer/ParentSelector" unique_id=178386324]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 0
@@ -122,37 +137,38 @@ mouse_filter = 2
 placeholder_text = "Drop Node to assign"
 editable = false
 
-[node name="HSeparator" type="HSeparator" parent="VBoxContainer/Extras"]
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras" unique_id=848963717]
 layout_mode = 2
 
-[node name="CheckButton" type="CheckButton" parent="VBoxContainer/Extras"]
+[node name="CheckButton" type="CheckButton" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras" unique_id=1371111192]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Paint Mode"
 
-[node name="PaintMode" type="VBoxContainer" parent="VBoxContainer/Extras"]
+[node name="PaintMode" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras" unique_id=54128795]
 unique_name_in_owner = true
 layout_mode = 2
 script = ExtResource("5_qgjgt")
 
-[node name="Status" type="Label" parent="VBoxContainer/Extras/PaintMode"]
+[node name="Status" type="Label" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" unique_id=259768877]
 unique_name_in_owner = true
 layout_mode = 2
 horizontal_alignment = 1
+autowrap_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Extras/PaintMode"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" unique_id=1216517608]
 layout_mode = 2
 
-[node name="SnapEnabled" type="CheckBox" parent="VBoxContainer/Extras/PaintMode/HBoxContainer"]
+[node name="SnapEnabled" type="CheckBox" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer" unique_id=279987403]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Snap"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Extras/PaintMode/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer" unique_id=2023476725]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SnapX" type="SpinBox" parent="VBoxContainer/Extras/PaintMode/HBoxContainer/HBoxContainer"]
+[node name="SnapX" type="SpinBox" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer" unique_id=1273789911]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -162,12 +178,12 @@ value = 8.0
 suffix = "px"
 select_all_on_focus = true
 
-[node name="Label2" type="Label" parent="VBoxContainer/Extras/PaintMode/HBoxContainer/HBoxContainer"]
+[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer" unique_id=305552540]
 auto_translate_mode = 2
 layout_mode = 2
 text = "x"
 
-[node name="SnapY" type="SpinBox" parent="VBoxContainer/Extras/PaintMode/HBoxContainer/HBoxContainer"]
+[node name="SnapY" type="SpinBox" parent="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer" unique_id=1718218858]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -177,18 +193,29 @@ value = 8.0
 suffix = "px"
 select_all_on_focus = true
 
-[node name="Dialogs" type="Node" parent="."]
+[node name="SideExtras" type="HBoxContainer" parent="HBoxContainer" unique_id=1979769026]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
 
-[node name="DeleteConfirm" type="ConfirmationDialog" parent="Dialogs"]
+[node name="ExtrasToggle2" type="Button" parent="HBoxContainer/SideExtras" unique_id=356037923]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("4_eqqv5")
+icon_alignment = 1
+
+[node name="Dialogs" type="Node" parent="." unique_id=120272584]
+
+[node name="DeleteConfirm" type="ConfirmationDialog" parent="Dialogs" unique_id=447146636]
 unique_name_in_owner = true
 size = Vector2i(391, 100)
 dialog_text = "This will permanently remove the tab. Continue?"
 
-[node name="AddTabConfirm" type="ConfirmationDialog" parent="Dialogs"]
+[node name="AddTabConfirm" type="ConfirmationDialog" parent="Dialogs" unique_id=2025521994]
 unique_name_in_owner = true
 size = Vector2i(200, 88)
 
-[node name="AddTabName" type="LineEdit" parent="Dialogs/AddTabConfirm"]
+[node name="AddTabName" type="LineEdit" parent="Dialogs/AddTabConfirm" unique_id=966482879]
 unique_name_in_owner = true
 anchors_preset = 10
 anchor_right = 1.0
@@ -198,21 +225,22 @@ offset_right = -8.0
 offset_bottom = 39.0
 placeholder_text = "Tab name"
 
-[node name="Viewport" type="SubViewport" parent="."]
+[node name="Viewport" type="SubViewport" parent="." unique_id=920022363]
 transparent_bg = true
 render_target_update_mode = 3
 
-[connection signal="active_tab_rearranged" from="VBoxContainer/HBoxContainer/Tabs" to="." method="on_rearrange"]
-[connection signal="tab_changed" from="VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_changed"]
-[connection signal="tab_close_pressed" from="VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_close_attempt"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Button" to="." method="on_add_tab_pressed"]
-[connection signal="text_changed" from="VBoxContainer/HBoxContainer2/FilterLineEdit" to="." method="_on_filter_changed"]
-[connection signal="pressed" from="VBoxContainer/ExtrasToggle" to="." method="toggle_extras"]
-[connection signal="toggled" from="VBoxContainer/Extras/CheckButton" to="VBoxContainer/Extras/PaintMode" method="set_paint_mode_enabled"]
-[connection signal="toggled" from="VBoxContainer/Extras/CheckButton" to="VBoxContainer/Extras/PaintMode" method="set_visible"]
-[connection signal="pressed" from="VBoxContainer/Extras/PaintMode/HBoxContainer/SnapEnabled" to="VBoxContainer/Extras/PaintMode" method="update_overlays"]
-[connection signal="value_changed" from="VBoxContainer/Extras/PaintMode/HBoxContainer/HBoxContainer/SnapX" to="VBoxContainer/Extras/PaintMode" method="_on_snap_changed"]
-[connection signal="value_changed" from="VBoxContainer/Extras/PaintMode/HBoxContainer/HBoxContainer/SnapY" to="VBoxContainer/Extras/PaintMode" method="_on_snap_changed"]
+[connection signal="active_tab_rearranged" from="HBoxContainer/VBoxContainer/HBoxContainer/Tabs" to="." method="on_rearrange"]
+[connection signal="tab_changed" from="HBoxContainer/VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_changed"]
+[connection signal="tab_close_pressed" from="HBoxContainer/VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_close_attempt"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/HBoxContainer/Button" to="." method="on_add_tab_pressed"]
+[connection signal="text_changed" from="HBoxContainer/VBoxContainer/TopContainer/FilterLineEdit" to="." method="_on_filter_changed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/BottomExtras/ExtrasToggle" to="." method="toggle_extras"]
+[connection signal="toggled" from="HBoxContainer/VBoxContainer/BottomExtras/Extras/CheckButton" to="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="set_paint_mode_enabled"]
+[connection signal="toggled" from="HBoxContainer/VBoxContainer/BottomExtras/Extras/CheckButton" to="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="set_visible"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/SnapEnabled" to="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="update_overlays"]
+[connection signal="value_changed" from="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer/SnapX" to="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="_on_snap_changed"]
+[connection signal="value_changed" from="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer/SnapY" to="HBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="_on_snap_changed"]
+[connection signal="pressed" from="HBoxContainer/SideExtras/ExtrasToggle2" to="." method="toggle_extras"]
 [connection signal="confirmed" from="Dialogs/DeleteConfirm" to="." method="remove_tab_confirm"]
 [connection signal="confirmed" from="Dialogs/AddTabConfirm" to="." method="add_tab_confirm"]
 [connection signal="text_submitted" from="Dialogs/AddTabConfirm/AddTabName" to="." method="add_tab_confirm"]
