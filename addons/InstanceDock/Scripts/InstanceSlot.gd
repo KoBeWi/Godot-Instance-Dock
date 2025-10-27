@@ -263,6 +263,7 @@ func _exit_tree() -> void:
 	if thread:
 		thread.wait_to_finish()
 		thread = null
+		set_process(false)
 
 func unedit():
 	if EditorInterface.get_inspector().get_edited_object() is InstanceDockPropertyEdit:

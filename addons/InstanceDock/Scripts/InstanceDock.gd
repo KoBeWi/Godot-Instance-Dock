@@ -136,6 +136,7 @@ func _notification(what: int) -> void:
 	
 	if what == NOTIFICATION_READY:
 		drag_label.owner = null
+		extras.owner = null
 		return
 	
 	if what == NOTIFICATION_DRAG_BEGIN:
