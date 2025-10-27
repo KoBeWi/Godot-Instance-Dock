@@ -23,6 +23,7 @@ enum {SLOT_MODE_ICONS, SLOT_MODE_TEXT, REFRESH_ALL_PREVIEWS}
 @onready var bottom_extras: VBoxContainer = %BottomExtras
 @onready var side_extras: HBoxContainer = %SideExtras
 @onready var v_box_container: VBoxContainer = %VBoxContainer
+@onready var text_slots: GridContainer = %TextSlots
 
 @onready var scroll := %ScrollContainer
 @onready var add_tab_label := %AddTabLabel
@@ -514,6 +515,7 @@ func _update_layout(layout: int) -> void:
 		if layout_vertical:
 			drag_label.reparent(v_box_container)
 			drag_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+			text_slots.columns = 1
 			
 			extras.reparent(bottom_extras)
 			bottom_extras.show()
@@ -522,6 +524,7 @@ func _update_layout(layout: int) -> void:
 			drag_label.reparent(top_container)
 			top_container.move_child(drag_label, 1)
 			drag_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+			text_slots.columns = 2
 			
 			extras.reparent(side_extras)
 			bottom_extras.hide()

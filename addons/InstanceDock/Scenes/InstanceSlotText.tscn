@@ -64,17 +64,7 @@ _data = {
 &"Rotate": SubResource("3")
 }
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1u6qi"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hom1a"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_au8j5"]
-draw_center = false
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.431373, 0, 1)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_khpyj"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s7yid"]
 draw_center = false
@@ -84,39 +74,50 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(1, 0, 0, 1)
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_khpyj"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_au8j5"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.431373, 0, 1)
 
-[node name="InstanceSlot" type="PanelContainer"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hom1a"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1u6qi"]
+
+[node name="InstanceSlot" type="PanelContainer" unique_id=750769059]
 offset_right = 144.0
 offset_bottom = 21.0
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("1")
 script = ExtResource("1_hrh6k")
 normal = SubResource("1")
 custom = SubResource("4")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1827766940]
 layout_mode = 2
 
-[node name="Icon" type="TextureRect" parent="HBoxContainer"]
+[node name="Icon" type="TextureRect" parent="HBoxContainer" unique_id=1915015457]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 1
 
-[node name="Loading" type="Sprite2D" parent="HBoxContainer/Icon"]
+[node name="Loading" type="Sprite2D" parent="HBoxContainer/Icon" unique_id=340995131]
 unique_name_in_owner = true
 visible = false
 position = Vector2(8, 8)
 texture = ExtResource("3_3qp7n")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="HBoxContainer/Icon/Loading"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HBoxContainer/Icon/Loading" unique_id=1081002730]
 unique_name_in_owner = true
 libraries = {
 &"": SubResource("AnimationLibrary_u8ud1")
 }
 
-[node name="Label" type="Label" parent="HBoxContainer"]
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=369521414]
 unique_name_in_owner = true
 z_as_relative = false
 layout_mode = 2
@@ -127,14 +128,14 @@ text = "Drop scene to assign"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Path" type="Label" parent="HBoxContainer"]
+[node name="Path" type="Label" parent="HBoxContainer" unique_id=1153181844]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 text_overrun_behavior = 3
 
-[node name="HasOverrides" type="TextureRect" parent="."]
+[node name="HasOverrides" type="TextureRect" parent="." unique_id=1251558158]
 visible = false
 texture_filter = 1
 layout_mode = 2
@@ -143,18 +144,18 @@ size_flags_vertical = 8
 texture = ExtResource("2_24cxw")
 stretch_mode = 2
 
-[node name="PaintButton" type="Button" parent="."]
+[node name="PaintButton" type="Button" parent="." unique_id=1807321299]
 visible = false
 layout_mode = 2
 focus_mode = 0
-theme_override_styles/focus = SubResource("StyleBoxEmpty_1u6qi")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_hom1a")
-theme_override_styles/hover = SubResource("StyleBoxFlat_au8j5")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_s7yid")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_khpyj")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_s7yid")
+theme_override_styles/hover = SubResource("StyleBoxFlat_au8j5")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_hom1a")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_1u6qi")
 toggle_mode = true
 
-[node name="Timer" type="Timer" parent="."]
+[node name="Timer" type="Timer" parent="." unique_id=1239110826]
 wait_time = 0.5
 one_shot = true
 

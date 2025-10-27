@@ -74,7 +74,7 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="TextSlots" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=121416047]
+[node name="TextSlots" type="GridContainer" parent="HBoxContainer/VBoxContainer/ScrollContainer/VBoxContainer" unique_id=1203728040]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
