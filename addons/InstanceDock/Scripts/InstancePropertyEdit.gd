@@ -10,7 +10,7 @@ func _get_property_list() -> Array[Dictionary]:
 	var ret: Array[Dictionary]
 	
 	for property in properties:
-		if property["usage"] != PROPERTY_USAGE_DEFAULT and not property["usage"] & (PROPERTY_USAGE_GROUP | PROPERTY_USAGE_CATEGORY | PROPERTY_USAGE_SUBGROUP):
+		if not property["usage"] & (PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_GROUP | PROPERTY_USAGE_CATEGORY | PROPERTY_USAGE_SUBGROUP):
 			continue
 		
 		if property["name"] == "position" or property["name"] == "script":
@@ -43,6 +43,12 @@ func _property_get_revert(property: StringName) -> Variant:
 		return get_script()
 	else:
 		return instance.get(property)
+
+func _hide_script_from_inspector() -> bool:
+	return true
+
+func _hide_metadata_from_inspector() -> bool:
+	return true
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
