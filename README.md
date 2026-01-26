@@ -81,6 +81,30 @@ When painting, the instances are by default created under the selected Node. You
 
 When not using Paint Mode, the scenes from the dock have the same dragging behavior as scenes from FileSystem, i.e. the Node is added to scene root by default, hold Ctrl to add it as child of the selected node, hold Shift to add it as sibling of the selected node. If a default Parent is assigned and the node is added under the scene root, it automatically gets reparented to the selected parent.
 
+## Other info
+
+### Layouts
+
+Instance Dock supports all current layout modes. Simply right-click the dock's tab to move it.
+
+- Vertical
+
+<img src="Media/LayoutVertical.webp" width="300">
+
+- Horizontal
+
+<img src="Media/LayoutHorizontal.webp" height="300">
+
+- Floating
+
+<img src="Media/LayoutFloating.webp" width="500">
+
+Note that floating mode uses the last layout, so e.g. if you make it floating while it's at the bottom, it will be floating horizontal.
+
+### Localization
+
+The addon supports translations and will automatically use the editor's language, if available. Currently only Polish translation is available. To make a new translation use the `InstanceDock.pot` file found in the addon's folder and feel free to open a pull request.
+
 ___
 You can find all my addons on my [profile page](https://github.com/KoBeWi).
 
