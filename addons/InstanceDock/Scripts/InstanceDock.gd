@@ -544,9 +544,6 @@ func _update_layout(layout: int) -> void:
 func update_margins():
 	var sb := EditorInterface.get_editor_theme().get_stylebox(&"BottomPanel", &"EditorStyles")
 	add_theme_constant_override(&"margin_top", -sb.get_margin(SIDE_TOP))
-	add_theme_constant_override(&"margin_left", -sb.get_margin(SIDE_LEFT))
-	add_theme_constant_override(&"margin_right", -sb.get_margin(SIDE_RIGHT))
-	add_theme_constant_override(&"margin_bottom", -sb.get_margin(SIDE_BOTTOM))
 
 class InstanceDock_Data:
 	class InstanceDock_Instance:
