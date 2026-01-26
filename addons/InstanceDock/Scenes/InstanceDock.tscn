@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://d3a6r5br2nw5"]
+[gd_scene format=3 uid="uid://d3a6r5br2nw5"]
 
 [ext_resource type="Script" uid="uid://c0f7ht031r3t8" path="res://addons/InstanceDock/Scripts/InstanceDock.gd" id="1_lolgq"]
 [ext_resource type="Texture2D" uid="uid://buv26pii10cx2" path="res://addons/InstanceDock/Textures/Add.svg" id="2_gdgx1"]
@@ -14,7 +14,7 @@ grow_vertical = 2
 title = "Instances"
 icon_name = &"PackedScene"
 default_slot = 3
-available_layouts = 3
+available_layouts = 7
 script = ExtResource("1_lolgq")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1067319394]

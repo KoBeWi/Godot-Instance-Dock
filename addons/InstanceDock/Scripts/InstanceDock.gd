@@ -508,6 +508,9 @@ func _on_filter_changed(new_text: String) -> void:
 	drag_label.visible = new_text.is_empty()
 
 func _update_layout(layout: int) -> void:
+	if layout == DOCK_LAYOUT_FLOATING:
+		return
+	
 	var new_vertical := layout == DOCK_LAYOUT_VERTICAL
 	if layout_vertical != new_vertical:
 		layout_vertical = new_vertical
