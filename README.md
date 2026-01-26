@@ -1,7 +1,7 @@
 # <img src="Media/Icon.png" width="64" height="64"> Godot Instance Dock
 Addon for Godot that adds a handy dock where you can store scenes.
 
-![](Media/Screenshot1.png)
+<img src="Media/Screenshot1.webp" height="270">
 
 ## Using scenes
 

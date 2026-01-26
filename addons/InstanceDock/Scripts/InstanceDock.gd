@@ -13,6 +13,7 @@ var CONFIG_FILE = "res://InstanceDockSceneData.txt"
 enum {SLOT_MODE_ICONS, SLOT_MODE_TEXT, REFRESH_ALL_PREVIEWS}
 
 @onready var tabs: TabBar = %Tabs
+@onready var tab_panel: PanelContainer = %TabPanel
 @onready var tab_add_confirm := %AddTabConfirm
 @onready var tab_add_name := %AddTabName
 @onready var tab_delete_confirm := %DeleteConfirm
@@ -25,7 +26,7 @@ enum {SLOT_MODE_ICONS, SLOT_MODE_TEXT, REFRESH_ALL_PREVIEWS}
 @onready var v_box_container: VBoxContainer = %VBoxContainer
 @onready var text_slots: GridContainer = %TextSlots
 
-@onready var scroll := %ScrollContainer
+@onready var scroll: ScrollContainer = %ScrollContainer
 @onready var add_tab_label := %AddTabLabel
 @onready var drag_label := %DragLabel
 
@@ -147,14 +148,18 @@ func _notification(what: int) -> void:
 	elif what == NOTIFICATION_DRAG_END:
 		if get_tree().node_added.is_connected(node_added):
 			get_tree().node_added.disconnect(node_added)
+	elif what == NOTIFICATION_THEME_CHANGED:
+		if not is_node_ready():
+			await ready
+		
+		tab_panel.add_theme_stylebox_override(&"panel", EditorInterface.get_editor_theme().get_stylebox(&"tabbar_background", &"TabContainer"))
 	
 	if initialized == 2:
 		return
 	
 	if what == NOTIFICATION_ENTER_TREE:
 		initialized = 1
-	
-	if what == NOTIFICATION_VISIBILITY_CHANGED:
+	elif what == NOTIFICATION_VISIBILITY_CHANGED:
 		if is_visible_in_tree() and slot_container != null and initialized == 1:
 			refresh_tab_contents()
 			initialized = 2
@@ -514,11 +519,13 @@ func _update_layout(layout: int) -> void:
 	var new_vertical := layout == DOCK_LAYOUT_VERTICAL
 	if layout_vertical != new_vertical:
 		layout_vertical = new_vertical
+		update_margins()
 		
 		if layout_vertical:
 			drag_label.reparent(v_box_container)
 			drag_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 			text_slots.columns = 1
+			scroll.scroll_hint_mode = ScrollContainer.SCROLL_HINT_MODE_DISABLED
 			
 			extras.reparent(bottom_extras)
 			bottom_extras.show()
@@ -528,10 +535,18 @@ func _update_layout(layout: int) -> void:
 			top_container.move_child(drag_label, 1)
 			drag_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 			text_slots.columns = 2
+			scroll.scroll_hint_mode = ScrollContainer.SCROLL_HINT_MODE_BOTTOM_AND_RIGHT
 			
 			extras.reparent(side_extras)
 			bottom_extras.hide()
 			side_extras.show()
+
+func update_margins():
+	var sb := EditorInterface.get_editor_theme().get_stylebox(&"BottomPanel", &"EditorStyles")
+	add_theme_constant_override(&"margin_top", -sb.get_margin(SIDE_TOP))
+	add_theme_constant_override(&"margin_left", -sb.get_margin(SIDE_LEFT))
+	add_theme_constant_override(&"margin_right", -sb.get_margin(SIDE_RIGHT))
+	add_theme_constant_override(&"margin_bottom", -sb.get_margin(SIDE_BOTTOM))
 
 class InstanceDock_Data:
 	class InstanceDock_Instance:
