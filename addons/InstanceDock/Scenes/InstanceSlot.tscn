@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://ba54n4w4qb18j"]
+[gd_scene format=3 uid="uid://ba54n4w4qb18j"]
 
 [ext_resource type="Script" uid="uid://cffy8p6erriue" path="res://addons/InstanceDock/Scripts/InstanceSlot.gd" id="1_uffwn"]
 [ext_resource type="Texture2D" uid="uid://dp0lseq583t66" path="res://addons/InstanceDock/Textures/Overrides.png" id="2_ehk6s"]
@@ -86,7 +86,7 @@ _data = {
 &"Rotate": SubResource("3")
 }
 
-[node name="InstanceSlot" type="PanelContainer"]
+[node name="InstanceSlot" type="PanelContainer" unique_id=612421934]
 offset_right = 64.0
 offset_bottom = 64.0
 theme_override_styles/panel = SubResource("1")
@@ -94,14 +94,14 @@ script = ExtResource("1_uffwn")
 normal = SubResource("1")
 custom = SubResource("4")
 
-[node name="Icon" type="TextureRect" parent="."]
+[node name="Icon" type="TextureRect" parent="." unique_id=189231008]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 1
 
-[node name="Label" type="Label" parent="Icon"]
+[node name="Label" type="Label" parent="Icon" unique_id=1660464864]
 unique_name_in_owner = true
 z_as_relative = false
 layout_mode = 1
@@ -118,7 +118,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="HasOverrides" type="TextureRect" parent="."]
+[node name="HasOverrides" type="TextureRect" parent="." unique_id=1557935325]
 visible = false
 texture_filter = 1
 layout_mode = 2
@@ -127,7 +127,7 @@ size_flags_vertical = 8
 texture = ExtResource("2_ehk6s")
 stretch_mode = 2
 
-[node name="PaintButton" type="Button" parent="."]
+[node name="PaintButton" type="Button" parent="." unique_id=1822003938]
 visible = false
 layout_mode = 2
 focus_mode = 0
@@ -138,25 +138,19 @@ theme_override_styles/disabled = SubResource("StyleBoxEmpty_hom1a")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_1u6qi")
 toggle_mode = true
 
-[node name="Loading" type="Sprite2D" parent="."]
+[node name="Loading" type="Sprite2D" parent="." unique_id=1808326070]
 unique_name_in_owner = true
 visible = false
 position = Vector2(32, 32)
 texture = ExtResource("3_8kfgm")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Loading"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Loading" unique_id=30479276]
 unique_name_in_owner = true
-libraries = {
-&"": SubResource("AnimationLibrary_u8ud1")
-}
+libraries/ = SubResource("AnimationLibrary_u8ud1")
 
-[node name="Timer" type="Timer" parent="."]
+[node name="Timer" type="Timer" parent="." unique_id=228240075]
 wait_time = 0.5
 one_shot = true
 
-[node name="DockNameHackForPOT" type="Label" parent="."]
-visible = false
-layout_mode = 2
-text = "Instances"
-
+[connection signal="pressed" from="PaintButton" to="." method="_on_paint_button_pressed"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

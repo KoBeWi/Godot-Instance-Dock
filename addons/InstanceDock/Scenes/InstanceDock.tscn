@@ -245,6 +245,11 @@ placeholder_text = "Tab name"
 transparent_bg = true
 render_target_update_mode = 3
 
+[node name="DockNameHackForPOT" type="Label" parent="." unique_id=309914390]
+visible = false
+layout_mode = 2
+text = "Instances"
+
 [connection signal="active_tab_rearranged" from="HBoxContainer/VBoxContainer/TabPanel/HBoxContainer/Tabs" to="." method="on_rearrange"]
 [connection signal="tab_changed" from="HBoxContainer/VBoxContainer/TabPanel/HBoxContainer/Tabs" to="." method="on_tab_changed"]
 [connection signal="tab_close_pressed" from="HBoxContainer/VBoxContainer/TabPanel/HBoxContainer/Tabs" to="." method="on_tab_close_attempt"]

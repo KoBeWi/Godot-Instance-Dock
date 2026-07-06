@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cud5aqeotr1y0"]
+[gd_scene format=3 uid="uid://cud5aqeotr1y0"]
 
 [ext_resource type="Script" uid="uid://cffy8p6erriue" path="res://addons/InstanceDock/Scripts/InstanceSlot.gd" id="1_hrh6k"]
 [ext_resource type="Texture2D" uid="uid://dp0lseq583t66" path="res://addons/InstanceDock/Textures/Overrides.png" id="2_24cxw"]
@@ -113,9 +113,7 @@ texture = ExtResource("3_3qp7n")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HBoxContainer/Icon/Loading" unique_id=1081002730]
 unique_name_in_owner = true
-libraries = {
-&"": SubResource("AnimationLibrary_u8ud1")
-}
+libraries/ = SubResource("AnimationLibrary_u8ud1")
 
 [node name="Label" type="Label" parent="HBoxContainer" unique_id=369521414]
 unique_name_in_owner = true
