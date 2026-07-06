@@ -17,7 +17,6 @@ enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
 @onready var timer: Timer = $Timer
 @onready var has_overrides: TextureRect = $HasOverrides
 @onready var text_label: Label = %Label
-@onready var paint_button: Button = $PaintButton
 
 var data: InstanceDock.InstanceDock_Data.InstanceDock_Instance
 var popup: PopupMenu
@@ -224,7 +223,6 @@ func apply_data():
 		set_icon(load(data.custom_texture))
 		add_theme_stylebox_override(&"panel", custom)
 	
-	paint_button.disabled = not is_valid()
 	has_overrides.visible = data != null and not data.overrides.is_empty()
 
 func start_load():
@@ -255,9 +253,6 @@ func get_hash() -> int:
 		return 0
 	return str(data.scene, data.overrides).hash()
 
-func setup_button(group: ButtonGroup):
-	paint_button.button_group = group
-
 func _exit_tree() -> void:
 	unedit()
 	if thread:
@@ -274,3 +269,13 @@ func filter(text: String):
 		filter_cache = get_scene().to_lower()
 	
 	visible = text.is_empty() or filter_cache.contains(text)
+
+func _on_paint_button_pressed() -> void:
+	var ps: PackedScene = load(data.scene)
+	var scene: Node = ps.instantiate()
+	
+	for override in data.overrides:
+		scene.set(override, data.overrides[override])
+	
+	var painter := EditorInterface.get_scene_paint_2d()
+	painter.set_painted_scene(scene)

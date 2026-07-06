@@ -27,28 +27,6 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_khpyj"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s7yid"]
-draw_center = false
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0, 0, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_au8j5"]
-draw_center = false
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.431373, 0, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hom1a"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1u6qi"]
-
 [sub_resource type="Animation" id="2"]
 length = 0.001
 tracks/0/type = "value"
@@ -128,15 +106,11 @@ texture = ExtResource("2_ehk6s")
 stretch_mode = 2
 
 [node name="PaintButton" type="Button" parent="." unique_id=1822003938]
-visible = false
 layout_mode = 2
 focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_khpyj")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_s7yid")
-theme_override_styles/hover = SubResource("StyleBoxFlat_au8j5")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_hom1a")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_1u6qi")
+mouse_filter = 1
 toggle_mode = true
+flat = true
 
 [node name="Loading" type="Sprite2D" parent="." unique_id=1808326070]
 unique_name_in_owner = true

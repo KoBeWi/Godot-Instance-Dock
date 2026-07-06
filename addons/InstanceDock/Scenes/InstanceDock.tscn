@@ -3,8 +3,6 @@
 [ext_resource type="Script" uid="uid://c0f7ht031r3t8" path="res://addons/InstanceDock/Scripts/InstanceDock.gd" id="1_lolgq"]
 [ext_resource type="Texture2D" uid="uid://buv26pii10cx2" path="res://addons/InstanceDock/Textures/Add.svg" id="2_gdgx1"]
 [ext_resource type="Texture2D" uid="uid://doleo6g38lico" path="res://addons/InstanceDock/Textures/GuiTabMenuHl.svg" id="3_bps6t"]
-[ext_resource type="Texture2D" uid="uid://b81f1abox2e67" path="res://addons/InstanceDock/Textures/Uncollapse.svg" id="4_eqqv5"]
-[ext_resource type="Script" uid="uid://d16qd5wan2vm5" path="res://addons/InstanceDock/Scripts/PaintMode.gd" id="5_qgjgt"]
 
 [node name="InstanceDock" type="EditorDock" unique_id=2014298426]
 anchors_preset = 9
@@ -109,117 +107,6 @@ layout_mode = 2
 text = "Drag scene from file system on a slot to assign or right-click to Quick Load."
 autowrap_mode = 2
 
-[node name="BottomExtras" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/VBoxContainer" unique_id=97909818]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="ExtrasToggle" type="Button" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras" unique_id=1819527858]
-unique_name_in_owner = true
-layout_mode = 2
-icon = ExtResource("4_eqqv5")
-icon_alignment = 1
-
-[node name="Extras" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras" unique_id=1213893627]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras" unique_id=1093471246]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/HBoxContainer" unique_id=1749179059]
-layout_mode = 2
-text = "Parent"
-
-[node name="ParentSelector" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/HBoxContainer" unique_id=2062099406]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="ParentIcon" type="TextureRect" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/HBoxContainer/ParentSelector" unique_id=357648234]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-mouse_filter = 2
-expand_mode = 2
-stretch_mode = 3
-
-[node name="ParentName" type="LineEdit" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/HBoxContainer/ParentSelector" unique_id=178386324]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-focus_mode = 0
-mouse_filter = 2
-placeholder_text = "Drop Node to assign"
-editable = false
-
-[node name="HSeparator" type="HSeparator" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras" unique_id=848963717]
-layout_mode = 2
-
-[node name="CheckButton" type="CheckButton" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras" unique_id=1371111192]
-layout_mode = 2
-size_flags_horizontal = 4
-text = "Paint Mode"
-
-[node name="PaintMode" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras" unique_id=54128795]
-unique_name_in_owner = true
-layout_mode = 2
-script = ExtResource("5_qgjgt")
-
-[node name="Status" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" unique_id=259768877]
-unique_name_in_owner = true
-layout_mode = 2
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" unique_id=1216517608]
-layout_mode = 2
-
-[node name="SnapEnabled" type="CheckBox" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer" unique_id=279987403]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Snap"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer" unique_id=2023476725]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="SnapX" type="SpinBox" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer" unique_id=1273789911]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-min_value = 1.0
-max_value = 512.0
-value = 8.0
-suffix = "px"
-select_all_on_focus = true
-
-[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer" unique_id=305552540]
-auto_translate_mode = 2
-layout_mode = 2
-text = "x"
-
-[node name="SnapY" type="SpinBox" parent="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer" unique_id=1718218858]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-min_value = 1.0
-max_value = 512.0
-value = 8.0
-suffix = "px"
-select_all_on_focus = true
-
-[node name="SideExtras" type="HBoxContainer" parent="HBoxContainer" unique_id=1979769026]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-
-[node name="ExtrasToggle2" type="Button" parent="HBoxContainer/SideExtras" unique_id=356037923]
-unique_name_in_owner = true
-layout_mode = 2
-icon = ExtResource("4_eqqv5")
-icon_alignment = 1
-
 [node name="Dialogs" type="Node" parent="." unique_id=120272584]
 
 [node name="DeleteConfirm" type="ConfirmationDialog" parent="Dialogs" unique_id=447146636]
@@ -255,13 +142,6 @@ text = "Instances"
 [connection signal="tab_close_pressed" from="HBoxContainer/VBoxContainer/TabPanel/HBoxContainer/Tabs" to="." method="on_tab_close_attempt"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer/TabPanel/HBoxContainer/Button" to="." method="on_add_tab_pressed"]
 [connection signal="text_changed" from="HBoxContainer/VBoxContainer/TopContainer/FilterLineEdit" to="." method="_on_filter_changed"]
-[connection signal="pressed" from="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/ExtrasToggle" to="." method="toggle_extras"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/CheckButton" to="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="set_visible"]
-[connection signal="toggled" from="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/CheckButton" to="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="set_paint_mode_enabled"]
-[connection signal="pressed" from="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/SnapEnabled" to="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="update_overlays"]
-[connection signal="value_changed" from="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer/SnapX" to="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="_on_snap_changed"]
-[connection signal="value_changed" from="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode/HBoxContainer/HBoxContainer/SnapY" to="HBoxContainer/VBoxContainer/VBoxContainer/BottomExtras/Extras/PaintMode" method="_on_snap_changed"]
-[connection signal="pressed" from="HBoxContainer/SideExtras/ExtrasToggle2" to="." method="toggle_extras"]
 [connection signal="confirmed" from="Dialogs/DeleteConfirm" to="." method="remove_tab_confirm"]
 [connection signal="confirmed" from="Dialogs/AddTabConfirm" to="." method="add_tab_confirm"]
 [connection signal="text_submitted" from="Dialogs/AddTabConfirm/AddTabName" to="." method="add_tab_confirm"]

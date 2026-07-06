@@ -2,7 +2,6 @@
 extends "ExtendedEditorPlugin.gd"
 
 var dock: EditorDock
-var paint_mode: Control
 
 func _init() -> void:
 	add_plugin_translations_from_directory("res://addons/InstanceDock/Translations")
@@ -11,23 +10,10 @@ func _ready() -> void:
 	dock = preload("res://addons/InstanceDock/Scenes/InstanceDock.tscn").instantiate()
 	dock.plugin = self
 	add_dock(dock)
-	paint_mode = dock.paint_mode
 
 func _exit_tree():
 	remove_dock(dock)
 	dock.free()
-
-func _handles(object: Object) -> bool:
-	return paint_mode.enabled and object is CanvasItem
-
-func _edit(object: Object) -> void:
-	paint_mode.edited_node = object
-
-func _forward_canvas_gui_input(event: InputEvent) -> bool:
-	return paint_mode.paint_input(event)
-
-func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
-	paint_mode.paint_draw(viewport_control)
 
 func _get_window_layout(configuration: ConfigFile) -> void:
 	var tabs: TabBar = dock.tabs

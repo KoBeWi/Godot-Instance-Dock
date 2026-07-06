@@ -22,22 +22,12 @@ enum {SLOT_MODE_ICONS, SLOT_MODE_TEXT, REFRESH_ALL_PREVIEWS}
 @onready var view_menu: MenuButton = %ViewMenu
 
 @onready var top_container: HBoxContainer = %TopContainer
-@onready var bottom_extras: VBoxContainer = %BottomExtras
-@onready var side_extras: HBoxContainer = %SideExtras
 @onready var v_box_container: VBoxContainer = %VBoxContainer
 @onready var text_slots: GridContainer = %TextSlots
 
 @onready var scroll: ScrollContainer = %ScrollContainer
 @onready var add_tab_label := %AddTabLabel
 @onready var drag_label := %DragLabel
-
-@onready var extras_toggle: Button = %ExtrasToggle
-@onready var extras_toggle2: Button = %ExtrasToggle2
-@onready var extras: VBoxContainer = %Extras
-@onready var parent_selector: HBoxContainer = %ParentSelector
-@onready var parent_icon: TextureRect = %ParentIcon
-@onready var parent_name: LineEdit = %ParentName
-@onready var paint_mode: VBoxContainer = %PaintMode
 
 @onready var icon_generator := $Viewport
 
@@ -94,11 +84,6 @@ func _ready() -> void:
 	
 	for tab in data.tab_data:
 		tabs.add_tab(tab.name)
-	
-	plugin.scene_changed.connect(on_scene_changed.unbind(1))
-	
-	extras.hide()
-	parent_selector.set_drag_forwarding(Callable(), _can_drop_node, _drop_node)
 
 func load_data():
 	data = InstanceDock_Data.new()
@@ -139,7 +124,6 @@ func _notification(what: int) -> void:
 	
 	if what == NOTIFICATION_READY:
 		drag_label.owner = null
-		extras.owner = null
 		return
 	
 	if what == NOTIFICATION_DRAG_BEGIN:
@@ -177,12 +161,6 @@ func node_added(node: Node):
 	var overrides: Dictionary = drag_data["instance_dock_overrides"]
 	for override in overrides:
 		node.set(override, overrides[override])
-	
-	if node.get_parent() == EditorInterface.get_edited_scene_root():
-		var parent := get_default_parent()
-		
-		if parent and node.get_parent() != parent:
-			do_reparent.call_deferred(node, parent)
 
 func do_reparent(node: Node, to: Node):
 	var undo_redo := plugin.get_undo_redo()
@@ -276,9 +254,6 @@ func refresh_tab_contents():
 	
 	if not filter_line_edit.text.is_empty():
 		_on_filter_changed(filter_line_edit.text)
-	
-	if paint_mode.enabled:
-		paint_mode.set_paint_mode_enabled(true)
 
 func remove_scene(slot: int):
 	var tab_scenes := data.tab_data[tabs.current_tab].instances
@@ -376,7 +351,6 @@ func generate_icon(scene_path: String, slot: Control):
 func add_slot() -> Control:
 	var slot: Control = slot_scene.instantiate()
 	slot_container.add_child(slot)
-	slot.setup_button(paint_mode.buttons)
 	slot.request_icon.connect(assign_icon.bind(slot))
 	slot.changed.connect(recreate_tab_data, CONNECT_DEFERRED)
 	return slot
@@ -410,41 +384,6 @@ func on_rearrange(idx_to: int) -> void:
 	data.tab_data[idx_to] = old_data
 	previous_tab = idx_to
 	save_data()
-
-func toggle_extras() -> void:
-	extras.visible = not extras.visible
-	if extras.visible:
-		extras_toggle.icon = preload("uid://dpa3fyapmielg")
-		extras_toggle2.icon = preload("uid://bx3v57l4mrrmi")
-	else:
-		extras_toggle.icon = preload("uid://b81f1abox2e67")
-		extras_toggle2.icon = preload("uid://cr5fieqinie62")
-
-func set_default_parent(node: Node):
-	if default_parent == node and not (default_parent and not node):
-		return
-	
-	default_parent = node
-	if node:
-		parent_icon.show()
-		parent_icon.texture = get_theme_icon(node.get_class(), &"EditorIcons")
-		parent_name.text = node.name
-		parent_selector.tooltip_text = EditorInterface.get_edited_scene_root().get_path_to(node)
-	else:
-		parent_icon.hide()
-		parent_name.text = "" # NO_TRANSLATE
-		parent_selector.tooltip_text = "" # NO_TRANSLATE
-
-func get_default_parent() -> Node:
-	var parent := default_parent
-	if is_instance_valid(parent):
-		if not parent.is_inside_tree():
-			set_default_parent(null)
-		else:
-			return parent
-	elif parent:
-		set_default_parent(null)
-	return null
 
 func set_slot_mode(new_slot_mode: int):
 	if new_slot_mode == current_slot_mode:
@@ -481,31 +420,6 @@ func on_menu_option(id: int):
 			if slot.is_valid():
 				slot.menu_option(slot.MenuOption.REFRESH)
 
-func on_scene_changed():
-	set_default_parent(null)
-
-func _can_drop_node(at: Vector2, data: Variant) -> bool:
-	if not data is Dictionary:
-		return false
-	
-	if not data.get("type", "") == "nodes":
-		return false
-	
-	if not "nodes" in data or not data["nodes"] is Array:
-		return false
-	
-	if data["nodes"].size() != 1 or not data["nodes"][0] is NodePath:
-		return false
-	
-	return true
-
-func _drop_node(at: Vector2, data: Variant):
-	var node: Node = get_tree().root.get_node_or_null(data["nodes"][0])
-	if not node:
-		return
-	
-	set_default_parent(node)
-
 func _on_filter_changed(new_text: String) -> void:
 	new_text = new_text.to_lower()
 	for slot in slot_container.get_children():
@@ -513,7 +427,7 @@ func _on_filter_changed(new_text: String) -> void:
 	
 	drag_label.visible = new_text.is_empty()
 
-func _update_layout(layout: int) -> void:
+func _update_layout(layout: int, slot: int) -> void:
 	if layout == DOCK_LAYOUT_FLOATING:
 		return
 	
@@ -527,20 +441,12 @@ func _update_layout(layout: int) -> void:
 			drag_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 			text_slots.columns = 1
 			scroll.scroll_hint_mode = ScrollContainer.SCROLL_HINT_MODE_DISABLED
-			
-			extras.reparent(bottom_extras)
-			bottom_extras.show()
-			side_extras.hide()
 		else:
 			drag_label.reparent(top_container)
 			top_container.move_child(drag_label, 1)
 			drag_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 			text_slots.columns = 2
 			scroll.scroll_hint_mode = ScrollContainer.SCROLL_HINT_MODE_BOTTOM_AND_RIGHT
-			
-			extras.reparent(side_extras)
-			bottom_extras.hide()
-			side_extras.show()
 
 func update_margins():
 	var sb := EditorInterface.get_editor_theme().get_stylebox(&"BottomPanel", &"EditorStyles")

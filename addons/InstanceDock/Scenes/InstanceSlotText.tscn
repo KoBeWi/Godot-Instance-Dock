@@ -64,28 +64,6 @@ _data = {
 &"Rotate": SubResource("3")
 }
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_khpyj"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s7yid"]
-draw_center = false
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0, 0, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_au8j5"]
-draw_center = false
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.431373, 0, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hom1a"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1u6qi"]
-
 [node name="InstanceSlot" type="PanelContainer" unique_id=750769059]
 offset_right = 144.0
 offset_bottom = 21.0
@@ -143,18 +121,14 @@ texture = ExtResource("2_24cxw")
 stretch_mode = 2
 
 [node name="PaintButton" type="Button" parent="." unique_id=1807321299]
-visible = false
 layout_mode = 2
 focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_khpyj")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_s7yid")
-theme_override_styles/hover = SubResource("StyleBoxFlat_au8j5")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_hom1a")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_1u6qi")
 toggle_mode = true
+flat = true
 
 [node name="Timer" type="Timer" parent="." unique_id=1239110826]
 wait_time = 0.5
 one_shot = true
 
+[connection signal="pressed" from="PaintButton" to="." method="_on_paint_button_pressed"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
