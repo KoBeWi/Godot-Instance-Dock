@@ -4,7 +4,7 @@ extends PanelContainer
 const InstanceDockPropertyEdit = preload("res://addons/InstanceDock/Scripts/InstancePropertyEdit.gd")
 const InstanceDock = preload("res://addons/InstanceDock/Scripts/InstanceDock.gd")
 
-enum MenuOption { EDIT, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
+enum MenuOption { EDIT, FIND, MODIFY, REMOVE, REFRESH, CLEAR, QUICK_LOAD }
 
 @export var normal: StyleBox
 @export var custom: StyleBox
@@ -132,11 +132,17 @@ func create_popup():
 	if is_valid():
 		popup.add_item("Open Scene", MenuOption.EDIT)
 		popup.add_item("Override Properties", MenuOption.MODIFY)
-		popup.add_item("Remove", MenuOption.REMOVE)
+		
+		popup.add_separator()
+		
 		if data.custom_texture:
 			popup.add_item("Remove Custom Icon", MenuOption.CLEAR)
 		else:
 			popup.add_item("Refresh Icon", MenuOption.REFRESH)
+		popup.add_item("Remove", MenuOption.REMOVE)
+		
+		popup.add_separator()
+		popup.add_item("Show in FileSystem", MenuOption.FIND)
 	
 	popup.add_item("Quick Load...", MenuOption.QUICK_LOAD)
 	
@@ -146,6 +152,8 @@ func menu_option(id: int) -> void:
 	match id:
 		MenuOption.EDIT:
 			EditorInterface.open_scene_from_path(data.scene)
+		MenuOption.FIND:
+			EditorInterface.get_file_system_dock().navigate_to_path(ResourceUID.ensure_path(data.scene))
 		MenuOption.MODIFY:
 			var editor := InstanceDockPropertyEdit.new()
 			editor.instance = load(data.scene).instantiate()
