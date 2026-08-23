@@ -1,7 +1,8 @@
 @tool
 extends EditorDock
 
-const PluginUtils = preload("res://addons/InstanceDock/PluginUtils.gd")
+const ExtendedEditorPlugin = preload("../ExtendedEditorPlugin.gd")
+
 const PROJECT_SETTING_CONFIG = "addons/instance_dock/scene_data_file"
 const PROJECT_SETTING_LEGACY = "addons/instance_dock/scenes"
 const PROJECT_SETTING_PREVIEW = "addons/instance_dock/preview_resolution"
@@ -58,7 +59,7 @@ var current_processed_item: ProcessedItem
 
 var default_parent: Node
 
-var plugin: EditorPlugin
+var plugin: ExtendedEditorPlugin
 
 func _ready() -> void:
 	set_process(false)
@@ -82,14 +83,14 @@ func _ready() -> void:
 			tab.erase("scroll")
 		ProjectSettings.set_setting(PROJECT_SETTING_LEGACY, null)
 	
-	CONFIG_FILE = PluginUtils.define_project_setting(PROJECT_SETTING_CONFIG, CONFIG_FILE, PROPERTY_HINT_SAVE_FILE)
+	CONFIG_FILE = plugin.define_project_setting(PROJECT_SETTING_CONFIG, CONFIG_FILE, PROPERTY_HINT_SAVE_FILE)
 	load_data()
 	
-	PREVIEW_SIZE = PluginUtils.define_project_setting(PROJECT_SETTING_PREVIEW, PREVIEW_SIZE)
+	PREVIEW_SIZE = plugin.define_project_setting(PROJECT_SETTING_PREVIEW, PREVIEW_SIZE)
 	icon_generator.size = PREVIEW_SIZE
 	
-	PluginUtils.track_project_setting(PROJECT_SETTING_CONFIG, self, _project_setting_changed)
-	PluginUtils.track_project_setting(PROJECT_SETTING_PREVIEW, self, _project_setting_changed)
+	plugin.track_project_setting(PROJECT_SETTING_CONFIG)
+	plugin.track_project_setting(PROJECT_SETTING_PREVIEW)
 	
 	for tab in data.tab_data:
 		tabs.add_tab(tab.name)
