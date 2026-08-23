@@ -117,8 +117,8 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 			create_popup()
+			popup.position = get_screen_position() + event.position
 			popup.popup()
-			popup.position = get_screen_transform() * event.position
 		elif event.double_click and event.button_index == MOUSE_BUTTON_LEFT and is_valid():
 			menu_option(MenuOption.EDIT)
 
